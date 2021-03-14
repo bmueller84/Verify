@@ -2,6 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net5.0</TargetFrameworks>
+    <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DiffEngine" Version="6.5.7" />
