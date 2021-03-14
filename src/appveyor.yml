@@ -2,7 +2,7 @@ skip_commits:
   message: /docs|Merge pull request.*/
 image:
 #- macOS
-- Visual Studio 2019
+- Visual Studio 2019 Preview
 - Ubuntu
 build_script:
   - dotnet build src --configuration Release
