@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading;
 using Xunit.Sdk;
+using Xunit.v3;
 
 namespace VerifyXunit
 {
@@ -12,12 +13,12 @@ namespace VerifyXunit
     {
         static AsyncLocal<MethodInfo?> local = new();
 
-        public override void Before(MethodInfo info)
+        public override void Before(MethodInfo info, _ITest test)
         {
             local.Value = info;
         }
 
-        public override void After(MethodInfo info)
+        public override void After(MethodInfo info, _ITest test)
         {
             local.Value = null;
         }
