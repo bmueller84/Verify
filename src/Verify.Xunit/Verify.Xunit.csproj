@@ -8,11 +8,8 @@
   <ItemGroup>
     <Content Include="build.props" PackagePath="build\Verify.Xunit.props" />
     <Content Include="buildMultiTargeting.props" PackagePath="buildMultiTargeting\Verify.Xunit.props" />
-    <PackageReference Include="xunit.v3.extensibility.core" Version="0.1.0-pre.332" />
+    <PackageReference Include="xunit.v3.extensibility.core" Version="0.1.0-pre.334" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="xunit.assert" Version="2.4.1" />
-    <PackageReference Include="xunit.abstractions" Version="2.0.3" />
-    <PackageReference Include="xunit.extensibility.execution" Version="2.4.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="ProjectDefaults" Version="1.0.54" PrivateAssets="All" />
     <PackageReference Include="EmptyFiles" Version="2.7.0" PrivateAssets="None" />
