@@ -14,6 +14,7 @@ namespace VerifyTests
             }
 
             instanceScrubbers = new(settings.instanceScrubbers);
+            extensionMappedInstanceScrubbers = new(settings.extensionMappedInstanceScrubbers);
             extension = settings.extension;
             diffEnabled = settings.diffEnabled;
             methodName = settings.methodName;
@@ -95,7 +96,7 @@ namespace VerifyTests
         internal bool autoVerify;
 
         /// <summary>
-        /// Automatically accept the results of the current tes.
+        /// Automatically accept the results of the current test.
         /// </summary>
         public void AutoVerify()
         {

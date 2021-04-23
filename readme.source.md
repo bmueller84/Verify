@@ -15,8 +15,6 @@ Support is available via a [Tidelift Subscription](https://tidelift.com/subscrip
 <a href='https://dotnetfoundation.org' alt='Part of the .NET Foundation'><img src='/docs/dotNetFoundation.svg' height='30px'></a><br>
 Part of the <a href='https://dotnetfoundation.org' alt=''>.NET Foundation</a>
 
-toc
-
 
 ## NuGet packages
 
@@ -125,6 +123,21 @@ See also: [Clipboard](/docs/clipboard.md)
 The same approach can be used to verify the results and the change to `Sample.Test.verified.txt` is committed to source control along with the change to `ClassBeingTested`.
 
 
+### VerifyJson
+
+`VerifyJson` performs the following actions
+
+ * Convert to `JToken` (if necessary).
+ * Apply [ignore member by name](serializer-settings.md#ignore-member-by-name) for keys.
+ * PrettyPrint the resulting text.
+
+snippet: VerifyJson
+
+Results in:
+
+snippet: SerializationTests.VerifyJsonString.verified.txt
+
+
 ## Received and Verified
 
  * **All `*.verified.*` files should be committed to source control.**
@@ -153,15 +166,14 @@ snippet: StaticSettings.cs
  * [Verify.Cosmos](https://github.com/VerifyTests/Verify.Cosmos): Verification of [Azure CosmosDB](https://docs.microsoft.com/en-us/azure/cosmos-db/).
  * [Verify.DiffPlex](https://github.com/VerifyTests/Verify.DiffPlex): Comparison of text via [DiffPlex](https://github.com/mmanela/diffplex).
  * [Verify.EntityFramework](https://github.com/VerifyTests/Verify.EntityFramework): Verification of EntityFramework bits.
+ * [Verify.HeadlessBrowsers](https://github.com/VerifyTests/Verify.HeadlessBrowsers): Verification of Web UIs using [Playwright](https://github.com/microsoft/playwright-sharp), [Puppeteer Sharp](https://github.com/hardkoded/puppeteer-sharp), or [Selenium](https://www.selenium.dev).
  * [Verify.ICSharpCode.Decompiler](https://github.com/VerifyTests/Verify.ICSharpCode.Decompiler): Comparison of assemblies and types via [ICSharpCode.Decompiler](https://github.com/icsharpcode/ILSpy/wiki/Getting-Started-With-ICSharpCode.Decompiler).
  * [Verify.ImageMagick](https://github.com/VerifyTests/Verify.ImageMagick): Verification and comparison of images via [Magick.NET](https://github.com/dlemstra/Magick.NET).
  * [Verify.ImageSharp](https://github.com/VerifyTests/Verify.ImageSharp): Verification of images via [ImageSharp](https://github.com/SixLabors/ImageSharp).
  * [Verify.NServiceBus](https://github.com/NServiceBusExtensions/Verify.NServiceBus): Verify NServiceBus Test Contexts.
  * [Verify.Phash](https://github.com/VerifyTests/Verify.Phash): Comparison of documents via [Phash](https://github.com/pgrho/phash).
  * [Verify.RavenDb](https://github.com/VerifyTests/Verify.RavenDb): Verification of [RavenDb](https://ravendb.net) bits.
- * [Verify.Selenium](https://github.com/VerifyTests/Verify.Selenium): Verification of Web UIs using [Selenium](https://www.selenium.dev).
  * [Verify.SqlServer](https://github.com/VerifyTests/Verify.SqlServer): Verification of SqlServer bits.
- * [Verify.Uno](https://github.com/VerifyTests/Verify.Uno): Verification to allow verification of [Uno UIs](https://platform.uno/).
  * [Verify.Web](https://github.com/VerifyTests/Verify.Web): Verification of web bits.
  * [Verify.WinForms](https://github.com/VerifyTests/Verify.WinForms): Verification of WinForms UIs.
  * [Verify.Xamarin](https://github.com/VerifyTests/Verify.Xamarin): Verification of Xamarin UIs.
@@ -181,6 +193,7 @@ Projects/tools that may be a better alternative to Verify
  * [ApprovalTests](https://github.com/approvals/ApprovalTests.Net)
  * [Snapshooter](https://github.com/SwissLife-OSS/Snapshooter)
  * [Snapper](https://github.com/theramis/Snapper)
+ * [Polaroider](https://github.com/WickedFlame/Polaroider)
 
 
 ## Security contact information

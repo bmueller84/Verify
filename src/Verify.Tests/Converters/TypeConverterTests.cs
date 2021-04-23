@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using VerifyTests;
 using VerifyXunit;
@@ -15,12 +16,16 @@ using System.Linq;
 [UsesVerify]
 public class TypeConverterTests
 {
-    [Fact]
-    public Task Inherited()
+    [ModuleInitializer]
+    public static void InheritedInit()
     {
         VerifierSettings.RegisterFileConverter<ParentClass>(
             (instance, _) => new(null, "txt", instance.Value));
+    }
 
+    [Fact]
+    public Task Inherited()
+    {
         InheritedClass target = new()
         {
             Value = "line1"
@@ -80,11 +85,16 @@ public class TypeConverterTests
         public string Value { get; set; } = null!;
     }
 
-    [Fact]
-    public Task ConvertWithNewline()
+    [ModuleInitializer]
+    public static void ConvertWithNewlineInit()
     {
         VerifierSettings.RegisterFileConverter<ClassToSplit>(
             (instance, _) => new(null, "txt", instance.Value));
+    }
+
+    [Fact]
+    public Task ConvertWithNewline()
+    {
         ClassToSplit target = new()
         {
             Value = $"line1{Environment.NewLine}line2"
@@ -97,12 +107,17 @@ public class TypeConverterTests
         public string Value { get; set; } = null!;
     }
 
-    [Fact]
-    public Task ConvertWithCanConvert_Invalid()
+    [ModuleInitializer]
+    public static void ConvertWithCanConvert_InvalidInit()
     {
         VerifierSettings.RegisterFileConverter<CanConvertTarget>(
             (instance, _) => new(null, "txt", instance.Value),
             (inner, _, _) => inner.Value == "Valid");
+    }
+
+    [Fact]
+    public Task ConvertWithCanConvert_Invalid()
+    {
         CanConvertTarget target = new()
         {
             Value = "Invalid"
@@ -110,12 +125,17 @@ public class TypeConverterTests
         return Verifier.Verify(target);
     }
 
-    [Fact]
-    public Task ConvertWithCanConvert_Valid()
+    [ModuleInitializer]
+    public static void ConvertWithCanConvert_ValidInit()
     {
         VerifierSettings.RegisterFileConverter<CanConvertTarget>(
             (instance, _) => new(null, "txt", instance.Value),
             (inner, _, _) => inner.Value == "Valid");
+    }
+
+    [Fact]
+    public Task ConvertWithCanConvert_Valid()
+    {
         CanConvertTarget target = new()
         {
             Value = "Valid"
@@ -129,8 +149,8 @@ public class TypeConverterTests
     }
 
 #if DEBUG
-    [Fact]
-    public Task WithInfo()
+    [ModuleInitializer]
+    public static void WithInfoInit()
     {
         VerifierSettings.RegisterFileConverter<Bitmap>(
             (bitmap1, _) =>
@@ -142,18 +162,28 @@ public class TypeConverterTests
                 };
                 return new ConversionResult(info, targets.Select(x => new Target("png", x)));
             },
-            (_, _, context) => (string)context["name"] == nameof(WithInfo) );
+            (_, _, context) =>
+            {
+                return context.ContainsKey("name") &&
+                       (string) context["name"] == nameof(WithInfo);
+            });
+    }
+
+    [Fact]
+    public Task WithInfo()
+    {
         VerifySettings settings = new();
         settings.Context["name"] = nameof(WithInfo);
         Bitmap bitmap = new(FileHelpers.OpenRead("sample.bmp"));
         return Verifier.Verify(bitmap, settings);
     }
 
-    [Fact]
-    public Task WithInfoShouldRespectSettings()
+    [ModuleInitializer]
+    public static void WithInfoShouldRespectSettingsInit()
     {
         VerifierSettings.RegisterFileConverter<Bitmap>(
             canConvert: (target, _, context) =>
+                context.ContainsKey("name") &&
                 (string) context["name"] == nameof(WithInfoShouldRespectSettings) &&
                 Equals(target.RawFormat, ImageFormat.Bmp),
             conversion: (bitmap1, _) =>
@@ -165,6 +195,11 @@ public class TypeConverterTests
                 };
                 return new ConversionResult(info, targets.Select(x => new Target("png", x)));
             });
+    }
+
+    [Fact]
+    public Task WithInfoShouldRespectSettings()
+    {
         VerifySettings settings = new();
         settings.Context["name"] = nameof(WithInfoShouldRespectSettings);
         settings.ModifySerialization(_ => { _.IgnoreMember("Property"); });
@@ -172,18 +207,24 @@ public class TypeConverterTests
         return Verifier.Verify(bitmap, settings);
     }
 
-    [Fact]
-    public Task TypeConversion()
+    [ModuleInitializer]
+    public static void TypeConversionInit()
     {
         VerifierSettings.RegisterFileConverter<Bitmap>(
             canConvert: (target, _, context) =>
-                (string)context["name"] == nameof(TypeConversion) &&
+                context.ContainsKey("name") &&
+                (string) context["name"] == nameof(TypeConversion) &&
                 Equals(target.RawFormat, ImageFormat.Bmp),
             conversion: (bitmap1, _) =>
             {
                 var targets = ConvertBmpTpPngStreams(bitmap1);
                 return new ConversionResult(null, targets.Select(x => new Target("png", x)));
             });
+    }
+
+    [Fact]
+    public Task TypeConversion()
+    {
         VerifySettings settings = new();
         settings.Context["name"] = nameof(TypeConversion);
         Bitmap bitmap = new(FileHelpers.OpenRead("sample.bmp"));

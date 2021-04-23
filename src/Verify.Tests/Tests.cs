@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
@@ -17,7 +19,8 @@ using System.Net.Http;
 [UsesVerify]
 public class Tests
 {
-    static Tests()
+    [ModuleInitializer]
+    public static void Initialize()
     {
         VerifierSettings.AddExtraDatetimeFormat("F");
         VerifierSettings.AddExtraDatetimeOffsetFormat("F");
@@ -123,11 +126,107 @@ public class Tests
         return Verifier.Verify(new {Property = "F\roo"});
     }
 
+    #region LoggerRecordingTyped
+
     [Fact]
-    public Task TreatAsString()
+    public Task LoggingTyped()
+    {
+        var provider = LoggerRecording.Start();
+        var logger = provider.CreateLogger<ClassThatUsesTypedLogging>();
+        ClassThatUsesTypedLogging target = new(logger);
+
+        var result = target.Method();
+
+        return Verifier.Verify(result);
+    }
+
+    class ClassThatUsesTypedLogging
+    {
+        ILogger<ClassThatUsesTypedLogging> logger;
+
+        public ClassThatUsesTypedLogging(ILogger<ClassThatUsesTypedLogging> logger)
+        {
+            this.logger = logger;
+        }
+
+        public string Method()
+        {
+            logger.LogWarning("The log entry");
+            return "result";
+        }
+    }
+
+    #endregion
+
+    [Fact]
+    public Task LoggingComplexState()
+    {
+        var provider = LoggerRecording.Start();
+        provider.Log(LogLevel.Warning, default, new StateObject("Value1"), null, (_, _) => "The Message");
+        using (provider.BeginScope(new StateObject("Value2")))
+        {
+            provider.Log(LogLevel.Warning, default, new StateObject("Value3"), null, (_, _) => "Entry in scope");
+        }
+
+        return Verifier.Verify("Foo");
+    }
+
+    public class StateObject
+    {
+        public string Property { get; }
+
+        public StateObject(string property)
+        {
+            Property = property;
+        }
+    }
+
+    #region LoggerRecording
+
+    [Fact]
+    public Task Logging()
+    {
+        var provider = LoggerRecording.Start();
+        ClassThatUsesLogging target = new(provider);
+
+        var result = target.Method();
+
+        return Verifier.Verify(result);
+    }
+
+    class ClassThatUsesLogging
+    {
+        ILogger logger;
+
+        public ClassThatUsesLogging(ILogger logger)
+        {
+            this.logger = logger;
+        }
+
+        public string Method()
+        {
+            logger.LogWarning("The log entry");
+            using (logger.BeginScope("The scope"))
+            {
+                logger.LogWarning("Entry in scope");
+            }
+
+            return "result";
+        }
+    }
+
+    #endregion
+
+    [ModuleInitializer]
+    public static void TreatAsStringInit()
     {
         VerifierSettings.TreatAsString<ClassWithToString>(
             (target, _) => target.Property);
+    }
+
+    [Fact]
+    public Task TreatAsString()
+    {
         return Verifier.Verify(new ClassWithToString {Property = "Foo"});
     }
 
@@ -206,12 +305,17 @@ public class Tests
         Assert.False(onVerifyMismatchCalled);
     }
 
-    [Fact]
-    public async Task SettingsArePassed()
+    [ModuleInitializer]
+    public static void SettingsArePassedInit()
     {
         VerifierSettings.RegisterStreamComparer(
             "SettingsArePassed",
             (_, _, _) => Task.FromResult(new CompareResult(true)));
+    }
+
+    [Fact]
+    public async Task SettingsArePassed()
+    {
         VerifySettings settings = new();
         settings.UseExtension("SettingsArePassed");
         await Verifier.Verify(new MemoryStream(new byte[] {1}), settings)
@@ -331,6 +435,12 @@ public class Tests
     }
 
     [Fact]
+    public Task StringBuilder()
+    {
+        return Verifier.Verify(new StringBuilder("value"));
+    }
+
+    [Fact]
     public async Task StringWithDifferingNewline()
     {
         var fullPath = Path.GetFullPath("../../../Tests.StringWithDifferingNewline.verified.txt");
@@ -370,7 +480,7 @@ public class Tests
     [Fact]
     public Task StreamNotAtStart()
     {
-        MemoryStream stream = new(new byte[] {1,2,3,4});
+        MemoryStream stream = new(new byte[] {1, 2, 3, 4});
         stream.Position = 2;
         return Verifier.Verify(stream);
     }
@@ -411,7 +521,8 @@ public class Tests
         await Verifier.Verify("A");
         VerifySettings settings = new();
         settings.DisableDiff();
-        await Assert.ThrowsAsync<Exception>(() => Verifier.Verify("a", settings));
+        FileNameBuilder.ClearPrefixList();
+        await Assert.ThrowsAsync<VerifyException>(() => Verifier.Verify("a", settings));
     }
 
     [Fact]

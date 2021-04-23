@@ -23,6 +23,13 @@ public class Tests
     }
 
     [Fact]
+    public Task VerifyJsonString()
+    {
+        var json = "{'key': {'msg': 'No action taken'}}";
+        return Verifier.VerifyJson(json);
+    }
+
+    [Fact]
     public Task Dynamic()
     {
         return Verifier.Verify(new {value = "Foo"});
@@ -53,7 +60,7 @@ public class Tests
                 {
                     Property = "Value"
                 };
-                return new(info, new[] {new Target("txt", "content")});
+                return new(info, "txt", "content");
             });
         return Verifier.Verify(new MemoryStream())
             .UseExtension("foo");

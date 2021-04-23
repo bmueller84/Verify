@@ -7,8 +7,10 @@ using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
@@ -21,7 +23,8 @@ using Xunit;
 [UsesVerify]
 public class SerializationTests
 {
-    static SerializationTests()
+    [ModuleInitializer]
+    public static void Initialize()
     {
         VerifierSettings.AddExtraDatetimeFormat("F");
         VerifierSettings.AddExtraDatetimeOffsetFormat("F");
@@ -156,6 +159,15 @@ public class SerializationTests
                 s.AppendLine("b");
                 s.AppendLine("c");
             });
+    }
+
+    [Fact]
+    public Task ExtensionAwareScrubbers()
+    {
+        var settings = new VerifySettings();
+        settings.UseExtension("html");
+        settings.AddScrubber("html", builder => builder.Replace("a", "b"));
+        return Verifier.Verify("a", settings);
     }
 
     [Fact]
@@ -309,9 +321,9 @@ public class SerializationTests
     }
 
     [Fact]
-    public async Task VerifyBytes()
+    public Task VerifyBytes()
     {
-        await Verifier.Verify(File.ReadAllBytes("sample.jpg"))
+        return Verifier.Verify(File.ReadAllBytes("sample.jpg"))
             .UseExtension("jpg");
     }
 
@@ -370,6 +382,24 @@ public class SerializationTests
         #region DontScrubGuids
 
         VerifierSettings.ModifySerialization(_ => _.DontScrubGuids());
+
+        #endregion
+    }
+
+    void DontScrubProjectDirectory()
+    {
+        #region DontScrubProjectDirectory
+
+        VerifierSettings.DontScrubProjectDirectory();
+
+        #endregion
+    }
+
+    void DontScrubSolutionDirectory()
+    {
+        #region DontScrubSolutionDirectory
+
+        VerifierSettings.DontScrubSolutionDirectory();
 
         #endregion
     }
@@ -451,7 +481,7 @@ public class SerializationTests
     [Fact]
     public Task ScrubTempPath()
     {
-        var tempPath = Path.GetTempPath().TrimEnd('/', '\\');;
+        var tempPath = Path.GetTempPath().TrimEnd('/', '\\');
         var altTempPath = tempPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         return Verifier.Verify(new {tempPath, altTempPath});
     }
@@ -459,7 +489,7 @@ public class SerializationTests
     [Fact]
     public Task ScrubCurrentDirectory()
     {
-        var currentDirectory = Environment.CurrentDirectory.TrimEnd('/', '\\');;
+        var currentDirectory = Environment.CurrentDirectory.TrimEnd('/', '\\');
         var altCurrentDirectory = currentDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         return Verifier.Verify(new {currentDirectory, altCurrentDirectory});
     }
@@ -468,7 +498,7 @@ public class SerializationTests
     [Fact]
     public Task ScrubCodeBaseLocation()
     {
-        var codeBaseLocation = CodeBaseLocation.CurrentDirectory!.TrimEnd('/', '\\');;
+        var codeBaseLocation = CodeBaseLocation.CurrentDirectory!.TrimEnd('/', '\\');
         var altCodeBaseLocation = codeBaseLocation.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         return Verifier.Verify(new {codeBaseLocation, altCodeBaseLocation});
     }
@@ -551,9 +581,9 @@ public class SerializationTests
     }
 
     [Fact]
-    public async Task NamedTupleWithNull()
+    public Task NamedTupleWithNull()
     {
-        await Verifier.Verify(() => MethodWithNamedTupleWithNull());
+        return Verifier.Verify(() => MethodWithNamedTupleWithNull());
     }
 
     static (string Member1, string? Member2) MethodWithNamedTupleWithNull()
@@ -733,23 +763,23 @@ public class SerializationTests
     #region IgnoreMembersThatThrowExpression
 
     [Fact]
-    public async Task ExceptionMessageProp()
+    public Task ExceptionMessageProp()
     {
         WithExceptionIgnoreMessage target = new();
 
         VerifySettings settings = new();
         settings.ModifySerialization(
             _ => _.IgnoreMembersThatThrow<Exception>(x => x.Message == "Ignore"));
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
 
     }
 
     [Fact]
-    public async Task ExceptionMessagePropFluent()
+    public Task ExceptionMessagePropFluent()
     {
         WithExceptionIgnoreMessage target = new();
 
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(
                 _ => _.IgnoreMembersThatThrow<Exception>(x => x.Message == "Ignore"));
     }
@@ -787,7 +817,7 @@ public class SerializationTests
     #region AddIgnoreInstance
 
     [Fact]
-    public async Task AddIgnoreInstance()
+    public Task AddIgnoreInstance()
     {
         IgnoreInstanceTarget target = new()
         {
@@ -803,11 +833,11 @@ public class SerializationTests
         VerifySettings settings = new();
         settings.ModifySerialization(
             _ => { _.IgnoreInstance<Instance>(x => x.Property == "Ignore"); });
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
     }
 
     [Fact]
-    public async Task AddIgnoreInstanceFluent()
+    public Task AddIgnoreInstanceFluent()
     {
         IgnoreInstanceTarget target = new()
         {
@@ -820,7 +850,7 @@ public class SerializationTests
                 Property = "Include"
             }
         };
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(
                 _ => { _.IgnoreInstance<Instance>(x => x.Property == "Ignore"); });
     }
@@ -841,7 +871,7 @@ public class SerializationTests
     #region AddIgnoreType
 
     [Fact]
-    public async Task IgnoreType()
+    public Task IgnoreType()
     {
         IgnoreTypeTarget target = new()
         {
@@ -856,11 +886,11 @@ public class SerializationTests
         };
         VerifySettings settings = new();
         settings.ModifySerialization(_ => _.IgnoreMembersWithType<ToIgnore>());
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
     }
 
     [Fact]
-    public async Task IgnoreTypeFluent()
+    public Task IgnoreTypeFluent()
     {
         IgnoreTypeTarget target = new()
         {
@@ -873,7 +903,7 @@ public class SerializationTests
                 Property = "Value"
             }
         };
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(_ => _.IgnoreMembersWithType<ToIgnore>());
 
     }
@@ -969,7 +999,7 @@ public class SerializationTests
     #region IgnoreMemberByExpression
 
     [Fact]
-    public async Task IgnoreMemberByExpression()
+    public Task IgnoreMemberByExpression()
     {
         IgnoreExplicitTarget target = new()
         {
@@ -987,11 +1017,11 @@ public class SerializationTests
             _.IgnoreMember<IgnoreExplicitTarget>(x => x.GetOnlyProperty);
             _.IgnoreMember<IgnoreExplicitTarget>(x => x.PropertyThatThrows);
         });
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
     }
 
     [Fact]
-    public async Task IgnoreMemberByExpressionFluent()
+    public Task IgnoreMemberByExpressionFluent()
     {
         IgnoreExplicitTarget target = new()
         {
@@ -999,7 +1029,7 @@ public class SerializationTests
             Field = "Value",
             Property = "Value"
         };
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(_ =>
             {
                 _.IgnoreMember<IgnoreExplicitTarget>(x => x.Property);
@@ -1015,7 +1045,7 @@ public class SerializationTests
     #region MemberConverterByExpression
 
     [Fact]
-    public async Task MemberConverterByExpression()
+    public Task MemberConverterByExpression()
     {
         MemberConverterTarget target = new()
         {
@@ -1028,18 +1058,18 @@ public class SerializationTests
             _.MemberConverter<MemberConverterTarget, string>(x => x.Property, (target, value) => value + "Suffix");
             _.MemberConverter<MemberConverterTarget, string>(x => x.Field, (target, value) => value + "Suffix");
         });
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
     }
 
     [Fact]
-    public async Task MemberConverterByExpressionFluent()
+    public Task MemberConverterByExpressionFluent()
     {
         MemberConverterTarget target = new()
         {
             Field = "Value",
             Property = "Value"
         };
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(_ =>
             {
                 _.MemberConverter<MemberConverterTarget, string>(
@@ -1062,7 +1092,7 @@ public class SerializationTests
     #region IgnoreMemberByName
 
     [Fact]
-    public async Task IgnoreMemberByName()
+    public Task IgnoreMemberByName()
     {
         IgnoreExplicitTarget target = new()
         {
@@ -1081,11 +1111,11 @@ public class SerializationTests
             _.IgnoreMember(type, "GetOnlyProperty");
             _.IgnoreMember(type, "PropertyThatThrows");
         });
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
     }
 
     [Fact]
-    public async Task IgnoreMemberByNameFluent()
+    public Task IgnoreMemberByNameFluent()
     {
         IgnoreExplicitTarget target = new()
         {
@@ -1094,7 +1124,7 @@ public class SerializationTests
             Property = "Value",
             PropertyByName = "Value"
         };
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(_ =>
             {
                 _.IgnoreMember("PropertyByName");
@@ -1109,18 +1139,102 @@ public class SerializationTests
     #endregion
 
     [Fact]
-    public async Task IgnoreDictionaryKeyByName()
+    public Task IgnoreJTokenByName()
     {
-        Dictionary<string, string> target = new()
+        var json = @"{
+  'short': {
+    'key': {
+      'code': 0,
+      'msg': 'No action taken'
+    },
+    'Ignore1': {
+      'code': 2,
+      'msg': 'ignore this'
+    }
+  }
+}";
+        var target = JToken.Parse(json);
+        return Verifier.Verify(target)
+            .ModifySerialization(_ =>
+            {
+                _.IgnoreMember("Ignore1");
+            });
+    }
+
+    [Fact]
+    public Task VerifyJsonGuid()
+    {
+        var json = "{'key': 'c572ff75-e1a2-49bd-99b9-4550697946c3'}";
+        return Verifier.VerifyJson(json);
+    }
+
+    [Fact]
+    public Task VerifyJsonDateTime()
+    {
+        var json = $"{{'key': '{DateTime.Now:yyyy-MM-ddTHH:mm:ss}'}}";
+        return Verifier.VerifyJson(json);
+    }
+
+    [Fact]
+    public Task VerifyJsonWithArray()
+    {
+        var json = @"{
+    commitments: [
+      {
+        id: '9585dadf-551a-43eb-960c-18b935993cc3',
+        title: 'Commitment1'
+      }
+    ]
+    }";
+        return Verifier.VerifyJson(json);
+    }
+
+    #region VerifyJson
+
+    [Fact]
+    public Task VerifyJsonString()
+    {
+        var json = "{'key': {'msg': 'No action taken'}}";
+        return Verifier.VerifyJson(json);
+    }
+
+    [Fact]
+    public Task VerifyJsonStream()
+    {
+        var json = "{'key': {'msg': 'No action taken'}}";
+        MemoryStream stream = new(Encoding.UTF8.GetBytes(json));
+        return Verifier.VerifyJson(stream);
+    }
+
+    [Fact]
+    public Task VerifyJsonJToken()
+    {
+        var json = "{'key': {'msg': 'No action taken'}}";
+        var target = JToken.Parse(json);
+        return Verifier.VerifyJson(target);
+    }
+
+    #endregion
+
+    [Fact]
+    public Task IgnoreDictionaryKeyByName()
+    {
+        Dictionary<string, object> target = new()
         {
-            {"Include", "Value1"},
-            {"Ignore", "Value2"},
+            {
+                "Include", new Dictionary<string, string>
+                {
+                    {"Ignore", "Value1"},
+                    {"Key1", "Value2"}
+                }
+            },
+            {"Ignore", "Value3"},
+            {"Key2", "Value4"},
         };
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(_ =>
             {
                 _.IgnoreMember("Ignore");
-                _.AddExtraSettings(json => json.TypeNameHandling = TypeNameHandling.All);
             });
     }
 
@@ -1139,19 +1253,19 @@ public class SerializationTests
     #region IgnoreMembersThatThrow
 
     [Fact]
-    public async Task CustomExceptionProp()
+    public Task CustomExceptionProp()
     {
         WithCustomException target = new();
         VerifySettings settings = new();
         settings.ModifySerialization(_ => _.IgnoreMembersThatThrow<CustomException>());
-        await Verifier.Verify(target, settings);
+        return Verifier.Verify(target, settings);
     }
 
     [Fact]
-    public async Task CustomExceptionPropFluent()
+    public Task CustomExceptionPropFluent()
     {
         WithCustomException target = new();
-        await Verifier.Verify(target)
+        return Verifier.Verify(target)
             .ModifySerialization(_ => _.IgnoreMembersThatThrow<CustomException>());
     }
 

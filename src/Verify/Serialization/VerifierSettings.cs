@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json;
@@ -62,6 +63,7 @@ namespace VerifyTests
             #region typeToStringMapping
 
             {typeof(string), (target, _) => (string) target},
+            {typeof(StringBuilder), (target, _) => ((StringBuilder) target).ToString()},
             {typeof(bool), (target, _) => ((bool) target).ToString()},
             {typeof(short), (target, _) => ((short) target).ToString()},
             {typeof(ushort), (target, _) => ((ushort) target).ToString()},
@@ -102,6 +104,13 @@ namespace VerifyTests
                 typeof(XDocument), (target, settings) =>
                 {
                     var converted = (XDocument) target;
+                    return new(converted.ToString(), "xml");
+                }
+            },
+            {
+                typeof(XElement), (target, settings) =>
+                {
+                    var converted = (XElement) target;
                     return new(converted.ToString(), "xml");
                 }
             }
@@ -151,5 +160,19 @@ namespace VerifyTests
         }
 
         public static bool StrictJson { get; private set; }
+
+        internal static bool scrubProjectDirectory = true;
+
+        public static void DontScrubProjectDirectory()
+        {
+            scrubProjectDirectory = false;
+        }
+
+        internal static bool scrubSolutionDirectory = true;
+
+        public static void DontScrubSolutionDirectory()
+        {
+            scrubSolutionDirectory = false;
+        }
     }
 }

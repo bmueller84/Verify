@@ -224,7 +224,7 @@ namespace VerifyTests
         }
 
         /// <summary>
-        /// Automatically accept the results of the current tes.
+        /// Automatically accept the results of the current test.
         /// </summary>
         public SettingsTask AutoVerify()
         {
@@ -271,7 +271,7 @@ namespace VerifyTests
             get => settings ??= new();
         }
 
-        Task ToTask()
+        public Task ToTask()
         {
             return task ??= buildTask(CurrentSettings);
         }

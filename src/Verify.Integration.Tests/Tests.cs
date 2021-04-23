@@ -10,13 +10,11 @@ using EmptyFiles;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
-using Xunit.Abstractions;
 
 [UsesVerify]
-public partial class Tests :
-    XunitContextBase
+public partial class Tests
 {
-    static string diffToolPath = Path.GetFullPath(Path.Combine(AssemblyLocation.CurrentDirectory, "../../../../FakeDiffTool/bin/FakeDiffTool.exe"));
+    static string toolPath = Path.GetFullPath(Path.Combine(AttributeReader.GetSolutionDirectory(), "FakeDiffTool/bin/FakeDiffTool.exe"));
 
     static Tests()
     {
@@ -29,12 +27,15 @@ public partial class Tests :
             supportsText: true,
             requiresTarget: true,
             arguments: (path1, path2) => $"\"{path1}\" \"{path2}\"",
-            exePath: diffToolPath,
-            binaryExtensions: new[] {"knownBin"});
+            exePath: toolPath,
+            binaryExtensions: new[] {"knownBin","AlwaysPassBin"});
         var binPath = AllFiles.Files["jpg"];
-        var newPath = Path.ChangeExtension(binPath.Path, "knownBin");
-        File.Copy(binPath.Path, newPath, true);
-        AllFiles.UseFile(Category.Image, newPath);
+        var knownBinPath = Path.ChangeExtension(binPath.Path, "knownBin");
+        File.Copy(binPath.Path, knownBinPath, true);
+        AllFiles.UseFile(Category.Image, knownBinPath);
+        var alwaysPassBinPath = Path.ChangeExtension(binPath.Path, "AlwaysPassBin");
+        File.Copy(binPath.Path, alwaysPassBinPath, true);
+        AllFiles.UseFile(Category.Image, alwaysPassBinPath);
 
         VerifierSettings.RegisterFileConverter<TypeToSplit>(
             (split, _) => new(
@@ -70,7 +71,10 @@ public partial class Tests :
                 continue;
             }
 
-            var commands = string.Join(Environment.NewLine, ProcessCleanup.Commands.Select(x => x.Command));
+            var verifiedCommands = ProcessCleanup.Commands
+                .Where(x => x.Command.Contains("verified"))
+                .Select(x => x.Command);
+            var commands = string.Join(Environment.NewLine, verifiedCommands);
             string message;
             if (isRunning)
             {
@@ -90,7 +94,7 @@ Commands:
 
     static string BuildCommand(FilePair pair)
     {
-        return $"\"{diffToolPath}\" \"{pair.Received}\" \"{pair.Verified}\"";
+        return $"\"{toolPath}\" \"{pair.Received}\" \"{pair.Verified}\"";
     }
 
     static void RunClipboardCommand()
@@ -120,8 +124,7 @@ Commands:
         return Assert.ThrowsAsync<VerifyException>(testCode);
     }
 
-    public Tests(ITestOutputHelper output) :
-        base(output)
+    public Tests()
     {
         FileNameBuilder.ClearPrefixList();
         ClipboardCapture.Clear();

@@ -22,24 +22,6 @@ Support is available via a [Tidelift Subscription](https://tidelift.com/subscrip
 <a href='https://dotnetfoundation.org' alt='Part of the .NET Foundation'><img src='/docs/dotNetFoundation.svg' height='30px'></a><br>
 Part of the <a href='https://dotnetfoundation.org' alt=''>.NET Foundation</a>
 
-<!-- toc -->
-## Contents
-
-  * [Usage](#usage)
-    * [Class being tested](#class-being-tested)
-    * [xUnit](#xunit)
-    * [NUnit](#nunit)
-    * [MSTest](#mstest)
-    * [Initial Verification](#initial-verification)
-    * [Subsequent Verification](#subsequent-verification)
-  * [Received and Verified](#received-and-verified)
-  * [Static settings](#static-settings)
-  * [Videos](#videos)
-  * [Extensions](#extensions)
-  * [More Documentation](#more-documentation)
-  * [Alternatives](#alternatives)
-  * [Security contact information](#security-contact-information)<!-- endToc -->
-
 
 ## NuGet packages
 
@@ -273,6 +255,58 @@ See also: [Clipboard](/docs/clipboard.md)
 The same approach can be used to verify the results and the change to `Sample.Test.verified.txt` is committed to source control along with the change to `ClassBeingTested`.
 
 
+### VerifyJson
+
+`VerifyJson` performs the following actions
+
+ * Convert to `JToken` (if necessary).
+ * Apply [ignore member by name](serializer-settings.md#ignore-member-by-name) for keys.
+ * PrettyPrint the resulting text.
+
+<!-- snippet: VerifyJson -->
+<a id='snippet-verifyjson'></a>
+```cs
+[Fact]
+public Task VerifyJsonString()
+{
+    var json = "{'key': {'msg': 'No action taken'}}";
+    return Verifier.VerifyJson(json);
+}
+
+[Fact]
+public Task VerifyJsonStream()
+{
+    var json = "{'key': {'msg': 'No action taken'}}";
+    var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+    return Verifier.VerifyJson(stream);
+}
+
+[Fact]
+public Task VerifyJsonJToken()
+{
+    var json = "{'key': {'msg': 'No action taken'}}";
+    var target = JToken.Parse(json);
+    return Verifier.VerifyJson(target);
+}
+```
+<sup><a href='/src/Verify.Tests/Serialization/SerializationTests.cs#L1192-L1217' title='Snippet source file'>snippet source</a> | <a href='#snippet-verifyjson' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+Results in:
+
+<!-- snippet: SerializationTests.VerifyJsonString.verified.txt -->
+<a id='snippet-SerializationTests.VerifyJsonString.verified.txt'></a>
+```txt
+{
+  key: {
+    msg: No action taken
+  }
+}
+```
+<sup><a href='/src/Verify.Tests/Serialization/SerializationTests.VerifyJsonString.verified.txt#L1-L5' title='Snippet source file'>snippet source</a> | <a href='#snippet-SerializationTests.VerifyJsonString.verified.txt' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
+
+
 ## Received and Verified
 
  * **All `*.verified.*` files should be committed to source control.**
@@ -312,20 +346,8 @@ public static class StaticSettingsUsage
         VerifierSettings.AddScrubber(_ => _.Replace("String to verify", "new value"));
     }
 }
-
-//Only required if using a legacy version of .net
-#if(!NET5_0)
-namespace System.Runtime.CompilerServices
-{
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public sealed class ModuleInitializerAttribute :
-        Attribute
-    {
-    }
-}
-#endif
 ```
-<sup><a href='/src/Verify.Tests/StaticSettings.cs#L1-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-StaticSettings.cs' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/StaticSettings.cs#L1-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-StaticSettings.cs' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -342,15 +364,14 @@ namespace System.Runtime.CompilerServices
  * [Verify.Cosmos](https://github.com/VerifyTests/Verify.Cosmos): Verification of [Azure CosmosDB](https://docs.microsoft.com/en-us/azure/cosmos-db/).
  * [Verify.DiffPlex](https://github.com/VerifyTests/Verify.DiffPlex): Comparison of text via [DiffPlex](https://github.com/mmanela/diffplex).
  * [Verify.EntityFramework](https://github.com/VerifyTests/Verify.EntityFramework): Verification of EntityFramework bits.
+ * [Verify.HeadlessBrowsers](https://github.com/VerifyTests/Verify.HeadlessBrowsers): Verification of Web UIs using [Playwright](https://github.com/microsoft/playwright-sharp), [Puppeteer Sharp](https://github.com/hardkoded/puppeteer-sharp), or [Selenium](https://www.selenium.dev).
  * [Verify.ICSharpCode.Decompiler](https://github.com/VerifyTests/Verify.ICSharpCode.Decompiler): Comparison of assemblies and types via [ICSharpCode.Decompiler](https://github.com/icsharpcode/ILSpy/wiki/Getting-Started-With-ICSharpCode.Decompiler).
  * [Verify.ImageMagick](https://github.com/VerifyTests/Verify.ImageMagick): Verification and comparison of images via [Magick.NET](https://github.com/dlemstra/Magick.NET).
  * [Verify.ImageSharp](https://github.com/VerifyTests/Verify.ImageSharp): Verification of images via [ImageSharp](https://github.com/SixLabors/ImageSharp).
  * [Verify.NServiceBus](https://github.com/NServiceBusExtensions/Verify.NServiceBus): Verify NServiceBus Test Contexts.
  * [Verify.Phash](https://github.com/VerifyTests/Verify.Phash): Comparison of documents via [Phash](https://github.com/pgrho/phash).
  * [Verify.RavenDb](https://github.com/VerifyTests/Verify.RavenDb): Verification of [RavenDb](https://ravendb.net) bits.
- * [Verify.Selenium](https://github.com/VerifyTests/Verify.Selenium): Verification of Web UIs using [Selenium](https://www.selenium.dev).
  * [Verify.SqlServer](https://github.com/VerifyTests/Verify.SqlServer): Verification of SqlServer bits.
- * [Verify.Uno](https://github.com/VerifyTests/Verify.Uno): Verification to allow verification of [Uno UIs](https://platform.uno/).
  * [Verify.Web](https://github.com/VerifyTests/Verify.Web): Verification of web bits.
  * [Verify.WinForms](https://github.com/VerifyTests/Verify.WinForms): Verification of WinForms UIs.
  * [Verify.Xamarin](https://github.com/VerifyTests/Verify.Xamarin): Verification of Xamarin UIs.
@@ -375,9 +396,11 @@ namespace System.Runtime.CompilerServices
   * [Using anonymous types](/docs/anonymous-types.md)
   * [Verifying binary data](/docs/binary.md)
   * [Http Recording](/docs/http-recording.md)
+  * [Logging Recording](/docs/logging-recording.md)
   * [Build server](/docs/build-server.md)
   * [Comparers](/docs/comparer.md)
   * [Converters](/docs/converter.md)
+  * [FSharp Usage](/docs/fsharp.md)
   * [Compared to ApprovalTests](/docs/compared-to-approvaltests.md) <!-- endInclude -->
 
 
@@ -388,6 +411,7 @@ Projects/tools that may be a better alternative to Verify
  * [ApprovalTests](https://github.com/approvals/ApprovalTests.Net)
  * [Snapshooter](https://github.com/SwissLife-OSS/Snapshooter)
  * [Snapper](https://github.com/theramis/Snapper)
+ * [Polaroider](https://github.com/WickedFlame/Polaroider)
 
 
 ## Security contact information
