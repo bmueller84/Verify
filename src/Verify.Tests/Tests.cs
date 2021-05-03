@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using VerifyXunit;
 using Xunit;
 #if NET5_0 && DEBUG
 using System.Linq;
-using System.Net.Http;
 #endif
 
 // Non-nullable field is uninitialized.
@@ -24,6 +24,39 @@ public class Tests
     {
         VerifierSettings.AddExtraDatetimeFormat("F");
         VerifierSettings.AddExtraDatetimeOffsetFormat("F");
+    }
+
+    [Fact]
+    public async Task HttpResponseNested()
+    {
+        using HttpClient client = new();
+
+        var result = await client.GetAsync("https://httpbin.org/get");
+
+        await Verifier.Verify(new{result})
+            .ScrubLinesContaining("Traceparent", "X-Amzn-Trace-Id", "origin", "Content-Length", "TrailingHeaders");
+    }
+
+    [Fact]
+    public async Task ImageHttpResponse()
+    {
+        using HttpClient client = new();
+
+        var result = await client.GetAsync("https://httpbin.org/image/png");
+
+        await Verifier.Verify(result)
+            .ScrubLinesContaining("Traceparent", "X-Amzn-Trace-Id", "origin", "Content-Length", "TrailingHeaders");
+    }
+
+    [Fact]
+    public async Task HttpResponse()
+    {
+        using HttpClient client = new();
+
+        var result = await client.GetAsync("https://httpbin.org/get");
+
+        await Verifier.Verify(result)
+            .ScrubLinesContaining("Traceparent", "X-Amzn-Trace-Id", "origin", "Content-Length", "TrailingHeaders");
     }
 
 #if NET5_0 && DEBUG
@@ -171,7 +204,7 @@ public class Tests
         return Verifier.Verify("Foo");
     }
 
-    public class StateObject
+    class StateObject
     {
         public string Property { get; }
 
@@ -339,7 +372,7 @@ public class Tests
         return Verifier.Throws(Nested.MethodThatThrows);
     }
 
-    public static class Nested
+    static class Nested
     {
         public static void MethodThatThrows()
         {
@@ -438,6 +471,28 @@ public class Tests
     public Task StringBuilder()
     {
         return Verifier.Verify(new StringBuilder("value"));
+    }
+
+    [Fact]
+    public Task NestedStringBuilder()
+    {
+        return Verifier.Verify(new {StringBuilder = new StringBuilder("value")});
+    }
+
+    [Fact]
+    public Task TextWriter()
+    {
+        StringWriter target = new();
+        target.Write("content");
+        return Verifier.Verify(target);
+    }
+
+    [Fact]
+    public Task NestedTextWriter()
+    {
+        StringWriter target = new();
+        target.Write("content");
+        return Verifier.Verify(new {target});
     }
 
     [Fact]

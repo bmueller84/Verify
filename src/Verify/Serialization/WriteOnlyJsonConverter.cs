@@ -7,9 +7,12 @@ namespace VerifyTests
     public abstract class WriteOnlyJsonConverter :
         JsonConverter
     {
-        public override bool CanRead => false;
+        public sealed override bool CanRead => false;
 
-        public sealed override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        public sealed override void WriteJson(
+            JsonWriter writer,
+            object? value,
+            JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -21,9 +24,17 @@ namespace VerifyTests
             WriteJson(writer, value, serializer, writerEx.Context);
         }
 
-        public abstract void WriteJson(JsonWriter writer, object value, JsonSerializer serializer, IReadOnlyDictionary<string, object> context);
+        public abstract void WriteJson(
+            JsonWriter writer,
+            object value,
+            JsonSerializer serializer,
+            IReadOnlyDictionary<string, object> context);
 
-        public sealed override object ReadJson(JsonReader reader, Type type, object? value, JsonSerializer serializer)
+        public sealed override object ReadJson(
+            JsonReader reader,
+            Type type,
+            object? value,
+            JsonSerializer serializer)
         {
             throw new NotImplementedException();
         }

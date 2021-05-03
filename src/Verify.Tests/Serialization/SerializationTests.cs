@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -131,12 +132,6 @@ public class SerializationTests
         Assert.NotSame(settings.ignoredByNameMembers, clone.ignoredByNameMembers);
         Assert.NotSame(settings.membersConverters, clone.membersConverters);
         Assert.NotSame(settings.membersConverters.First().Value, clone.membersConverters.First().Value);
-    }
-
-    public class SettingsIsClonedTarget
-    {
-        public string Property1 { get; set; } = null!;
-        public string Property2 { get; set; } = null!;
     }
 
     [Fact]
@@ -586,6 +581,36 @@ public class SerializationTests
         return Verifier.Verify(() => MethodWithNamedTupleWithNull());
     }
 
+    [Fact]
+    public Task Claim()
+    {
+        return Verifier.Verify(new Claim("TheType", "TheValue"));
+    }
+
+    [Fact]
+    public Task ClaimWithClaimType()
+    {
+        return Verifier.Verify(new Claim(ClaimTypes.Email, "TheValue"));
+    }
+
+    [Fact]
+    public Task ClaimsPrincipal()
+    {
+        ClaimsIdentity claimsIdentity = new();
+        claimsIdentity.AddClaim(new Claim("TheType", "TheValue"));
+        ClaimsPrincipal claimsPrincipal = new();
+        claimsPrincipal.AddIdentity(claimsIdentity);
+        return Verifier.Verify(claimsPrincipal);
+    }
+
+    [Fact]
+    public Task ClaimsIdentity()
+    {
+        ClaimsIdentity claimsIdentity = new();
+        claimsIdentity.AddClaim(new Claim("TheType", "TheValue"));
+        return Verifier.Verify(claimsIdentity);
+    }
+
     static (string Member1, string? Member2) MethodWithNamedTupleWithNull()
     {
         return ("A", null);
@@ -671,7 +696,7 @@ public class SerializationTests
         return Verifier.Verify(target);
     }
 
-    public class GuidTarget
+    class GuidTarget
     {
         public Guid Guid;
         public Guid? GuidNullable;
@@ -689,7 +714,7 @@ public class SerializationTests
         return Verifier.Verify(target);
     }
 
-    public class EscapeTarget
+    class EscapeTarget
     {
         public string Property;
     }
@@ -704,7 +729,7 @@ public class SerializationTests
         return Verifier.Verify(target);
     }
 
-    public class NotDatesTarget
+    class NotDatesTarget
     {
         public string NotDate;
     }
@@ -749,7 +774,7 @@ public class SerializationTests
         return Verifier.Verify(target);
     }
 
-    public class CollectionTarget
+    class CollectionTarget
     {
         public Dictionary<int, string> DictionaryProperty;
         public List<string> ListProperty;

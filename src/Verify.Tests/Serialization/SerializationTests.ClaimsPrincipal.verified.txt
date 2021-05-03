@@ -1,0 +1,9 @@
+﻿[
+  {
+    Claims: [
+      {
+        TheType: TheValue
+      }
+    ]
+  }
+]

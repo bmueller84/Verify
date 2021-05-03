@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NET5_0
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
@@ -52,24 +53,14 @@ namespace VerifyTests
 
         static (string? content, string? prettyContent) TryReadStringContent(HttpContent content)
         {
-            var type = content.Headers.ContentType?.MediaType;
-            if (type == null)
-            {
-                return (null, null);
-            }
-
-            if (!type.StartsWith("text") &&
-                !type.EndsWith("graphql") &&
-                !type.EndsWith("javascript") &&
-                !type.EndsWith("json") &&
-                !type.EndsWith("xml"))
+            if (!content.IsText(out var subType))
             {
                 return (null, null);
             }
 
             var stringContent = content.ReadAsStringAsync().GetAwaiter().GetResult();
             var prettyContent = stringContent;
-            if (type.EndsWith("json"))
+            if (subType == "json")
             {
                 try
                 {
@@ -79,7 +70,7 @@ namespace VerifyTests
                 {
                 }
             }
-            else if (type.EndsWith("xml"))
+            else if (subType == "xml")
             {
                 try
                 {
@@ -113,3 +104,4 @@ namespace VerifyTests
         public string? ResponseContentStringRaw { get; }
     }
 }
+#endif

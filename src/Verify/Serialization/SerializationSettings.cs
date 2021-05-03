@@ -11,6 +11,8 @@ namespace VerifyTests
 {
     public partial class SerializationSettings
     {
+        static HttpContentConverter httpContentConverter = new();
+        static JArrayConverter jArrayConverter = new();
         static FileInfoConverter fileInfoConverter = new();
         static UriConverter uriConverter = new();
         static DirectoryInfoConverter directoryInfoConverter = new();
@@ -24,6 +26,12 @@ namespace VerifyTests
         static ParameterInfoConverter parameterInfoConverter = new();
         static VersionConverter versionConverter = new();
         static PropertyInfoConverter propertyInfoConverter = new();
+        static ClaimConverter claimConverter = new();
+        static ClaimsPrincipalConverter claimsPrincipalConverter = new();
+        static ClaimsIdentityConverter claimsIdentityConverter = new();
+        static HttpHeadersConverter httpHeadersConverter = new();
+        static JObjectConverter jObjectConverter = new();
+        static NameValueCollectionConverter nameValueCollectionConverter = new();
 
         public SerializationSettings()
         {
@@ -134,6 +142,8 @@ namespace VerifyTests
                 membersConverters);
             var converters = settings.Converters;
             converters.Add(new StringConverter(scrubber));
+            converters.Add(new StringBuilderConverter(scrubber));
+            converters.Add(new TextWriterConverter(scrubber));
             converters.Add(new GuidConverter(scrubber));
             converters.Add(new DateTimeConverter(scrubber));
             converters.Add(new DateTimeOffsetConverter(scrubber));
@@ -150,11 +160,15 @@ namespace VerifyTests
             converters.Add(constructorInfoConverter);
             converters.Add(propertyInfoConverter);
             converters.Add(parameterInfoConverter);
-            converters.Add(new HttpHeadersConverter(ignoredByNameMembers));
+            converters.Add(claimConverter);
+            converters.Add(claimsIdentityConverter);
+            converters.Add(claimsPrincipalConverter);
+            converters.Add(httpHeadersConverter);
+            converters.Add(httpContentConverter);
             converters.Add(new DictionaryConverter(ignoredByNameMembers));
-            converters.Add(new JArrayConverter());
-            converters.Add(new JObjectConverter(ignoredByNameMembers));
-            converters.Add(new NameValueCollectionConverter(ignoredByNameMembers));
+            converters.Add(jArrayConverter);
+            converters.Add(jObjectConverter);
+            converters.Add(nameValueCollectionConverter);
             foreach (var extraSetting in ExtraSettings)
             {
                 extraSetting(settings);
