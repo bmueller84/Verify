@@ -1,8 +1,9 @@
 ﻿{
   Type: Exception,
   Message:
-The prefix has already been used: Existing: {ProjectDirectory}Naming/NamerTests.Conflict.
-This is mostly caused by a conflicting combination of `VerifierSettings.DerivePathInfo()`, `UseMethodName.UseDirectory()`, `UseMethodName.UseTypeName()`, and `UseMethodName.UseMethodName()`. Prefix: {ProjectDirectory}Naming/NamerTests.Conflict,
+The prefix has already been used: {ProjectDirectory}Naming/NamerTests.Conflict.
+This is mostly caused by a conflicting combination of `VerifierSettings.DerivePathInfo()`, `UseMethodName.UseDirectory()`, `UseMethodName.UseTypeName()`, and `UseMethodName.UseMethodName()`.
+If that's not the case, and having multiple identical prefixes is acceptable, then call `VerifierSettings.DisableRequireUniquePrefix()` to disable this uniqueness validation.,
   StackTrace:
 at PrefixUnique.CheckPrefixIsUnique(String prefix)
 at InnerVerifier..ctor(String sourceFile, VerifySettings settings, GetFileConvention fileConvention)

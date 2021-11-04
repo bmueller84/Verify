@@ -7,7 +7,6 @@ Serialization settings can be customized at three levels:
  * Global: Will run for test methods on all tests.
 
 
-
 ## Not valid json
 
 Note that the output is technically not valid json.
@@ -118,9 +117,17 @@ Results in the following:
 
 snippet: SerializationTests.ShouldReUseDatetime.verified.txt
 
-To disable this behavior globally use:
+To disable this behavior use:
 
 snippet: DontScrubDateTimes
+
+Or using the fluent api use:
+
+snippet: DontScrubDateTimesFluent
+
+Or globally use:
+
+snippet: DontScrubDateTimesGlobal
 
 
 ## Numeric Ids are scrubbed
@@ -133,9 +140,25 @@ Results in the following:
 
 snippet: SerializationTests.NumericIdScrubbing.verified.txt
 
+
+### Convention
+
+A custom "is member a numeric Id" convention is supported.
+
+To define a convention use:
+
+snippet: TreatAsNumericId
+
+To define a convention globally use:
+
+snippet: TreatAsNumericIdGlobal
+
+
+### Disable
+
 To disable this globally use:
 
-snippet: DisableNumericIdGlobal
+snippet: DisableNumericId
 
 To disable this behavior globally use:
 

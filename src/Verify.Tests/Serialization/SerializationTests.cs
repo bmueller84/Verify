@@ -1,11 +1,13 @@
 ﻿using System.Collections.Specialized;
-using System.Linq.Expressions;
-using System.Security.Claims;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
+#if !NET461
+using System.Linq.Expressions;
+using System.Security.Claims;
+#endif
 // ReSharper disable UnusedParameter.Local
 // ReSharper disable MemberCanBeMadeStatic.Local
 
@@ -50,11 +52,57 @@ public class SerializationTests
     {
         var dictionary = new SortedDictionary<int, string>(new DescendingComparer<int>())
         {
-            { 1, "1234" },
-            { 2, "5678" }
+            {1, "1234"},
+            {2, "5678"}
         };
 
         return Verifier.Verify(dictionary);
+    }
+
+    [Fact]
+    public Task SymbolOrdering1()
+    {
+        var target = new Dictionary<string, int>
+        {
+            {"#", 1},
+            {"@", 2},
+        };
+
+        return Verifier.Verify(target);
+    }
+
+    [Fact]
+    public Task SymbolOrdering2()
+    {
+        var target = new Dictionary<string, int>
+        {
+            {"@", 2},
+            {"#", 1},
+        };
+
+        return Verifier.Verify(target);
+    }
+
+    [Fact]
+    public Task JObjectOrdering1()
+    {
+        var obj = new JObject(
+            new JProperty("@xmlns", 2),
+            new JProperty("#text", 1)
+        );
+
+        return Verifier.Verify(obj);
+    }
+
+    [Fact]
+    public Task JObjectOrdering2()
+    {
+        var obj = new JObject(
+            new JProperty("#text", 1),
+            new JProperty("@xmlns", 2)
+        );
+
+        return Verifier.Verify(obj);
     }
 
     [Fact]
@@ -62,9 +110,9 @@ public class SerializationTests
     {
         var dictionary = new SortedDictionary<string, string>(new DescendingComparer<string>())
         {
-            { "Entry_1", "1234" },
-            { "ignored", "1234" },
-            { "Entry_2", "5678" }
+            {"Entry_1", "1234"},
+            {"ignored", "1234"},
+            {"Entry_2", "5678"}
         };
 
         return Verifier.Verify(dictionary)
@@ -127,7 +175,7 @@ public class SerializationTests
     {
         var dictionary = new Dictionary<string, string>
         {
-            { "ignored", "1234" }
+            {"ignored", "1234"}
         };
 
         if (DateTime.UtcNow.Ticks % 2 == 0)
@@ -170,7 +218,7 @@ public class SerializationTests
     }
 #if NET6_0_OR_GREATER
 
-    #region AddExtraSettings
+#region AddExtraSettings
 
     [Fact]
     public Task AddExtraSettings()
@@ -184,9 +232,9 @@ public class SerializationTests
         return Verifier.Verify(target, verifySettings);
     }
 
-    #endregion
+#endregion
 
-    #region AddExtraSettingsFluent
+#region AddExtraSettingsFluent
 
     [Fact]
     public Task AddExtraSettingsFluent()
@@ -199,7 +247,7 @@ public class SerializationTests
                     serializerSettings.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat));
     }
 
-    #endregion
+#endregion
 
 #endif
 
@@ -214,7 +262,64 @@ public class SerializationTests
         #endregion
     }
 
+    #region TreatAsNumericId
+
+    [Fact]
+    public Task TreatAsNumericId()
+    {
+        var target = new IdConventionTarget
+        {
+            TheProperty = 5
+        };
+        return Verifier.Verify(target)
+            .ModifySerialization(
+                settings => settings.TreatAsNumericId(
+                    member => member.Name == "TheProperty"));
+    }
+
+    #endregion
+
+    #region TreatAsNumericIdGlobal
+
+    [Fact]
+    public Task TreatAsNumericIdGlobal()
+    {
+        VerifierSettings.ModifySerialization(
+            settings => settings.TreatAsNumericId(
+                member => member.Name == "TheProperty"));
+        var target = new IdConventionTarget
+        {
+            TheProperty = 5
+        };
+        return Verifier.Verify(target);
+    }
+
+    #endregion
+
+    public class IdConventionTarget
+    {
+        public int TheProperty { get; set; }
+    }
+
     #region DisableNumericIdGlobal
+
+    [Fact]
+    public Task NumericIdScrubbingDisabledGlobal()
+    {
+        VerifierSettings.ModifySerialization(settings => settings.DontScrubNumericIds());
+        return Verifier.Verify(
+            new
+            {
+                Id = 5,
+                OtherId = 5,
+                YetAnotherId = 4,
+                PossibleNullId = (int?) 5,
+                ActualNullId = (int?) null
+            });
+    }
+
+    #endregion
+    #region DisableNumericId
 
     [Fact]
     public Task NumericIdScrubbingDisabled()
@@ -233,25 +338,6 @@ public class SerializationTests
 
     #endregion
 
-    #region DisableNumericIdGlobal
-
-    [Fact]
-    public Task NumericIdScrubbingDisabledGlobal()
-    {
-        VerifierSettings.ModifySerialization(settings => settings.DontScrubNumericIds());
-        return Verifier.Verify(
-            new
-            {
-                Id = 5,
-                OtherId = 5,
-                YetAnotherId = 4,
-                PossibleNullId = (int?)5,
-                ActualNullId = (int?)null
-            });
-    }
-
-    #endregion
-
     #region NumericId
 
     [Fact]
@@ -262,8 +348,8 @@ public class SerializationTests
             Id = 5,
             OtherId = 5,
             YetAnotherId = 4,
-            PossibleNullId = (int?)5,
-            ActualNullId = (int?)null
+            PossibleNullId = (int?) 5,
+            ActualNullId = (int?) null
         };
 
         return Verifier.Verify(target);
@@ -356,21 +442,21 @@ public class SerializationTests
         settings.AddScrubber("html", builder => builder.Replace("a", "b"));
         return Verifier.Verify("a", settings);
     }
-    
+
     [Fact]
     public Task NameValueCollection()
     {
         return Verifier.Verify(
             new
             {
-                item1 = new NameValueCollection { { null, null } },
-                item2 = new NameValueCollection { { "key", null } },
-                item3 = new NameValueCollection { { null, "value" } },
-                item4 = new NameValueCollection { { "key", "value" } },
-                item5 = new NameValueCollection { { "key", "value1" }, { "key", "value2" } },
-                item6 = new NameValueCollection { { "key", null }, { "key", "value2" } },
-                item7 = new NameValueCollection { { "key", "value1" }, { "key", null } },
-                item8 = new NameValueCollection { { "key1", "value1" }, { "key2", "value2" } },
+                item1 = new NameValueCollection {{null, null}},
+                item2 = new NameValueCollection {{"key", null}},
+                item3 = new NameValueCollection {{null, "value"}},
+                item4 = new NameValueCollection {{"key", "value"}},
+                item5 = new NameValueCollection {{"key", "value1"}, {"key", "value2"}},
+                item6 = new NameValueCollection {{"key", null}, {"key", "value2"}},
+                item7 = new NameValueCollection {{"key", "value1"}, {"key", null}},
+                item8 = new NameValueCollection {{"key1", "value1"}, {"key2", "value2"}},
             });
     }
 
@@ -400,7 +486,7 @@ public class SerializationTests
         return Verifier.Verify(
             new
             {
-                bytes = new byte[] { 1 }
+                bytes = new byte[] {1}
             });
     }
 
@@ -414,7 +500,7 @@ public class SerializationTests
             GivenNames = "John",
             FamilyName = "Smith",
             Spouse = "Jill",
-            Children = new() { "Sam", "Mary" },
+            Children = new() {"Sam", "Mary"},
             Address = new()
             {
                 Street = "1 Puddle Lane",
@@ -444,7 +530,7 @@ public class SerializationTests
             GivenNames = "John",
             FamilyName = "Smith",
             Spouse = "Jill",
-            Children = new() { "Sam", "Mary" },
+            Children = new() {"Sam", "Mary"},
             Address = new()
             {
                 Street = "1 Puddle Lane",
@@ -475,7 +561,7 @@ public class SerializationTests
     [Fact]
     public async Task ShouldReUseDatetime()
     {
-        #region Date
+#region Date
 
         var dateTime = DateTime.Now;
         var dateTimeOffset = DateTimeOffset.Now;
@@ -494,7 +580,7 @@ public class SerializationTests
 
         await Verifier.Verify(target);
 
-        #endregion
+#endregion
     }
 
     [Fact]
@@ -697,9 +783,41 @@ public class SerializationTests
         #endregion
     }
 
-    void DontScrubDateTimes()
+    Task DontScrubDateTimes()
     {
         #region DontScrubDateTimes
+
+        var target = new
+        {
+            Date = DateTime.Now
+        };
+
+        var settings = new VerifySettings();
+        settings.ModifySerialization(_ => _.DontScrubDateTimes());
+
+        return Verifier.Verify(target, settings);
+
+        #endregion
+    }
+
+    Task DontScrubDateTimesFluent()
+    {
+        #region DontScrubDateTimesFluent
+
+        var target = new
+        {
+            Date = DateTime.Now
+        };
+
+        return Verifier.Verify(target)
+            .ModifySerialization(_ => _.DontScrubDateTimes());
+
+        #endregion
+    }
+
+    void DontScrubDateTimesGlobal()
+    {
+        #region DontScrubDateTimesGlobal
 
         VerifierSettings.ModifySerialization(_ => _.DontScrubDateTimes());
 
@@ -718,7 +836,7 @@ public class SerializationTests
     [Fact]
     public Task NewLineNotEscapedInProperty()
     {
-        return Verifier.Verify(new { Property = "a\r\nb\\nc" });
+        return Verifier.Verify(new {Property = "a\r\nb\\nc"});
     }
 
     void List()
@@ -767,7 +885,7 @@ public class SerializationTests
     {
         var tempPath = Path.GetTempPath().TrimEnd('/', '\\');
         var altTempPath = tempPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        return Verifier.Verify(new { tempPath, altTempPath });
+        return Verifier.Verify(new {tempPath, altTempPath});
     }
 
     [Fact]
@@ -775,7 +893,7 @@ public class SerializationTests
     {
         var currentDirectory = Environment.CurrentDirectory.TrimEnd('/', '\\');
         var altCurrentDirectory = currentDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        return Verifier.Verify(new { currentDirectory, altCurrentDirectory });
+        return Verifier.Verify(new {currentDirectory, altCurrentDirectory});
     }
 
 #if !NET5_0_OR_GREATER
@@ -784,7 +902,7 @@ public class SerializationTests
     {
         var codeBaseLocation = CodeBaseLocation.CurrentDirectory!.TrimEnd('/', '\\');
         var altCodeBaseLocation = codeBaseLocation.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        return Verifier.Verify(new { codeBaseLocation, altCodeBaseLocation });
+        return Verifier.Verify(new {codeBaseLocation, altCodeBaseLocation});
     }
 #endif
 
@@ -793,7 +911,7 @@ public class SerializationTests
     {
         var baseDirectory = AppDomain.CurrentDomain.BaseDirectory.TrimEnd('/', '\\');
         var altBaseDirectory = baseDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        return Verifier.Verify(new { baseDirectory, altBaseDirectory });
+        return Verifier.Verify(new {baseDirectory, altBaseDirectory});
     }
 
     class TypeTarget
@@ -819,7 +937,7 @@ public class SerializationTests
     {
         #region type
 
-        var foo = new { x = 1 };
+        var foo = new {x = 1};
         var target = new TypeTarget
         {
             Type = GetType(),
@@ -831,26 +949,26 @@ public class SerializationTests
         #endregion
     }
 
-#if(!NETSTANDARD2_0)
+#if (!NETSTANDARD2_0 && !NET461)
     [Fact]
     public async Task NamedTuple()
     {
-        #region VerifyTuple
+#region VerifyTuple
 
         await Verifier.VerifyTuple(() => MethodWithNamedTuple());
 
-        #endregion
+#endregion
     }
 
-    #region MethodWithNamedTuple
+#region MethodWithNamedTuple
 
     static (bool Member1, string Member2, string Member3) MethodWithNamedTuple()
     {
         return (true, "A", "B");
     }
 
-    #endregion
-
+#endregion
+#if !NET461
     [Fact]
     public async Task PartialNamedTuple()
     {
@@ -858,6 +976,7 @@ public class SerializationTests
         PrefixUnique.Clear();
         await Verifier.Verify(exception.Message);
     }
+#endif
 
     static (bool, string Member2, string Member3) MethodWithPartialNamedTuple()
     {
@@ -908,7 +1027,7 @@ public class SerializationTests
     [Fact]
     public async Task ShouldReUseGuid()
     {
-        #region guid
+#region guid
 
         var guid = Guid.NewGuid();
         var target = new GuidTarget
@@ -921,7 +1040,7 @@ public class SerializationTests
 
         await Verifier.Verify(target);
 
-        #endregion
+#endregion
     }
 
     [Fact]
@@ -1091,15 +1210,15 @@ public class SerializationTests
 
     void ExceptionMessagePropGlobal()
     {
-        #region IgnoreMembersThatThrowExpressionGlobal
+#region IgnoreMembersThatThrowExpressionGlobal
 
         VerifierSettings.ModifySerialization(
             _ => _.IgnoreMembersThatThrow<Exception>(x => x.Message == "Ignore"));
 
-        #endregion
+#endregion
     }
 
-    #region IgnoreMembersThatThrowExpression
+#region IgnoreMembersThatThrowExpression
 
     [Fact]
     public Task ExceptionMessageProp()
@@ -1122,7 +1241,7 @@ public class SerializationTests
                 _ => _.IgnoreMembersThatThrow<Exception>(x => x.Message == "Ignore"));
     }
 
-    #endregion
+#endregion
 
     [Fact]
     public Task ExpressionString()
@@ -1154,15 +1273,15 @@ public class SerializationTests
 
     void AddIgnoreInstanceGlobal()
     {
-        #region AddIgnoreInstanceGlobal
+#region AddIgnoreInstanceGlobal
 
         VerifierSettings.ModifySerialization(
             _ => { _.IgnoreInstance<Instance>(x => x.Property == "Ignore"); });
 
-        #endregion
+#endregion
     }
 
-    #region AddIgnoreInstance
+#region AddIgnoreInstance
 
     [Fact]
     public Task AddIgnoreInstance()
@@ -1203,7 +1322,7 @@ public class SerializationTests
                 _ => { _.IgnoreInstance<Instance>(x => x.Property == "Ignore"); });
     }
 
-    #endregion
+#endregion
 
     class IgnoreInstanceTarget
     {
@@ -1218,15 +1337,15 @@ public class SerializationTests
 
     void AddIgnoreTypeGlobal()
     {
-        #region AddIgnoreTypeGlobal
+#region AddIgnoreTypeGlobal
 
         VerifierSettings.ModifySerialization(
             _ => _.IgnoreMembersWithType<ToIgnore>());
 
-        #endregion
+#endregion
     }
 
-    #region AddIgnoreType
+#region AddIgnoreType
 
     [Fact]
     public Task IgnoreType()
@@ -1266,7 +1385,7 @@ public class SerializationTests
 
     }
 
-    #endregion
+#endregion
 
     [Fact]
     public Task Type()
@@ -1355,7 +1474,7 @@ public class SerializationTests
 
     void IgnoreMemberByExpressionGlobal()
     {
-        #region IgnoreMemberByExpressionGlobal
+#region IgnoreMemberByExpressionGlobal
 
         VerifierSettings.ModifySerialization(_ =>
         {
@@ -1366,10 +1485,10 @@ public class SerializationTests
             _.IgnoreMember<IgnoreExplicitTarget>(x => x.PropertyThatThrows);
         });
 
-        #endregion
+#endregion
     }
 
-    #region IgnoreMemberByExpression
+#region IgnoreMemberByExpression
 
     [Fact]
     public Task IgnoreMemberByExpression()
@@ -1412,10 +1531,10 @@ public class SerializationTests
             });
     }
 
-    #endregion
+#endregion
 
 
-    #region MemberConverter
+#region MemberConverter
 
     [Fact]
     public Task MemberConverterByExpression()
@@ -1454,11 +1573,11 @@ public class SerializationTests
             });
     }
 
-    #endregion
+#endregion
 
     void MemberConverterGlobal()
     {
-        #region MemberConverterGlobal
+#region MemberConverterGlobal
 
         VerifierSettings.ModifySerialization(_ =>
         {
@@ -1470,7 +1589,7 @@ public class SerializationTests
                 (target, value) => value + "Suffix");
         });
 
-        #endregion
+#endregion
     }
 
     class MemberConverterTarget
@@ -1481,7 +1600,7 @@ public class SerializationTests
 
     void IgnoreMemberByNameGlobal()
     {
-        #region IgnoreMemberByNameGlobal
+#region IgnoreMemberByNameGlobal
 
         VerifierSettings.ModifySerialization(_ =>
         {
@@ -1493,10 +1612,10 @@ public class SerializationTests
             _.IgnoreMember(type, "PropertyThatThrows");
         });
 
-        #endregion
+#endregion
     }
 
-    #region IgnoreMemberByName
+#region IgnoreMemberByName
 
     [Fact]
     public Task IgnoreMemberByName()
@@ -1543,7 +1662,7 @@ public class SerializationTests
             });
     }
 
-    #endregion
+#endregion
 
     [Fact]
     public Task IgnoreJTokenByName()
@@ -1593,7 +1712,7 @@ public class SerializationTests
         return Verifier.VerifyJson(json);
     }
 
-    #region VerifyJson
+#region VerifyJson
 
     [Fact]
     public Task VerifyJsonString()
@@ -1618,7 +1737,7 @@ public class SerializationTests
         return Verifier.VerifyJson(target);
     }
 
-    #endregion
+#endregion
 
     [Fact]
     public Task IgnoreDictionaryKeyByName()
@@ -1655,14 +1774,14 @@ public class SerializationTests
 
     void CustomExceptionPropGlobal()
     {
-        #region IgnoreMembersThatThrowGlobal
+#region IgnoreMembersThatThrowGlobal
 
         VerifierSettings.ModifySerialization(_ => _.IgnoreMembersThatThrow<CustomException>());
 
-        #endregion
+#endregion
     }
 
-    #region IgnoreMembersThatThrow
+#region IgnoreMembersThatThrow
 
     [Fact]
     public Task CustomExceptionProp()
@@ -1681,7 +1800,7 @@ public class SerializationTests
             .ModifySerialization(_ => _.IgnoreMembersThatThrow<CustomException>());
     }
 
-    #endregion
+#endregion
 
     class WithCustomException
     {
@@ -1765,14 +1884,14 @@ public class SerializationTests
 
     void WithObsoletePropIncludedGlobally()
     {
-        #region WithObsoletePropIncludedGlobally
+#region WithObsoletePropIncludedGlobally
 
         VerifierSettings.ModifySerialization(_ => { _.IncludeObsoletes(); });
 
-        #endregion
+#endregion
     }
 
-    #region WithObsoletePropIncluded
+#region WithObsoletePropIncluded
 
     [Fact]
     public Task WithObsoletePropIncluded()
@@ -1799,9 +1918,9 @@ public class SerializationTests
             .ModifySerialization(_ => { _.IncludeObsoletes(); });
     }
 
-    #endregion
+#endregion
 
-    #region WithObsoleteProp
+#region WithObsoleteProp
 
     class WithObsolete
     {
@@ -1822,7 +1941,7 @@ public class SerializationTests
         return Verifier.Verify(target);
     }
 
-    #endregion
+#endregion
 
 #pragma warning restore 612
     [Fact]

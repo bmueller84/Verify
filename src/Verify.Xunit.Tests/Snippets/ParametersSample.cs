@@ -5,6 +5,35 @@ using Xunit;
 [UsesVerify]
 public class ParametersSample
 {
+    public static IEnumerable<object[]> GetDecimalData()
+    {
+        yield return new object[] {(decimal) 1.1};
+    }
+
+    [Theory]
+    [MemberData(nameof(GetDecimalData))]
+    public async Task Decimal(decimal arg)
+    {
+        await Verifier.Verify(arg)
+            .UseParameters(arg);
+    }
+
+    [Theory]
+    [InlineData((float) 1.1)]
+    public async Task Float(float arg)
+    {
+        await Verifier.Verify(arg)
+            .UseParameters(arg);
+    }
+
+    [Theory]
+    [InlineData(1.1d)]
+    public async Task Double(double arg)
+    {
+        await Verifier.Verify(arg)
+            .UseParameters(arg);
+    }
+
     #region xunitInlineData
 
     [Theory]

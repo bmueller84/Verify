@@ -5,7 +5,7 @@ using Xunit;
 [UsesVerify]
 public class NamerTests
 {
-#if NET6_0
+#if NET6_0 && DEBUG
     [Fact]
     public async Task ThrowOnConflict()
     {
@@ -25,7 +25,32 @@ public class NamerTests
         }
 
         await Verifier.ThrowsTask(Run)
+            .ScrubLinesContaining("InnerVerifier.ValidatePrefix")
             .UseMethodName("ThrowOnConflict")
+            .AddScrubber(builder => builder.Replace(@"\", "/"));
+    }
+
+    [Fact]
+    public async Task DoesntThrowOnConflict()
+    {
+        static Task Run()
+        {
+            return Verifier.Verify("Value")
+                .UseMethodName("Conflict")
+                .DisableRequireUniquePrefix()
+                .DisableDiff();
+        }
+
+        try
+        {
+            await Run();
+        }
+        catch
+        {
+        }
+
+        await Verifier.Verify("Value")
+            .UseMethodName("DoesntThrowOnConflict")
             .AddScrubber(builder => builder.Replace(@"\", "/"));
     }
 #endif
@@ -39,11 +64,85 @@ public class NamerTests
     }
 
     [Fact]
+    public Task RuntimeFluent()
+    {
+        return Verifier.Verify(Namer.Runtime)
+            .UniqueForRuntime();
+    }
+
+    [Fact]
     public Task RuntimeAndVersion()
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntimeAndVersion();
         return Verifier.Verify(Namer.RuntimeAndVersion, settings);
+    }
+
+    [Fact]
+    public Task RuntimeAndVersionFluent()
+    {
+        return Verifier.Verify(Namer.RuntimeAndVersion)
+            .UniqueForRuntimeAndVersion();
+    }
+
+    [Fact]
+    public Task TargetFramework()
+    {
+        var settings = new VerifySettings();
+        settings.UniqueForTargetFramework();
+        return Verifier.Verify("Foo", settings);
+    }
+
+    [Fact]
+    public Task TargetFrameworkWithAssembly()
+    {
+        var settings = new VerifySettings();
+        settings.UniqueForTargetFramework(typeof(ClassBeingTested).Assembly);
+        return Verifier.Verify("Foo", settings);
+    }
+
+    [Fact]
+    public Task TargetFrameworkFluent()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForTargetFramework();
+    }
+
+    [Fact]
+    public Task TargetFrameworkFluentWithAssembly()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForTargetFramework(typeof(ClassBeingTested).Assembly);
+    }
+
+    [Fact]
+    public Task TargetFrameworkAndVersion()
+    {
+        var settings = new VerifySettings();
+        settings.UniqueForTargetFrameworkAndVersion();
+        return Verifier.Verify("Foo", settings);
+    }
+
+    [Fact]
+    public Task TargetFrameworkAndVersionWithAssembly()
+    {
+        var settings = new VerifySettings();
+        settings.UniqueForTargetFrameworkAndVersion(typeof(ClassBeingTested).Assembly);
+        return Verifier.Verify("Foo", settings);
+    }
+
+    [Fact]
+    public Task TargetFrameworkAndVersionFluent()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForTargetFrameworkAndVersion();
+    }
+
+    [Fact]
+    public Task TargetFrameworkAndVersionFluentWithAssembly()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForTargetFrameworkAndVersion(typeof(ClassBeingTested).Assembly);
     }
 
     [Fact]
@@ -165,6 +264,26 @@ public class NamerTests
         settings.UniqueForAssemblyConfiguration();
         return Verifier.Verify("Foo", settings);
     }
+    [Fact]
+    public Task AssemblyConfigurationWithAssembly()
+    {
+        var settings = new VerifySettings();
+        settings.UniqueForAssemblyConfiguration(typeof(ClassBeingTested).Assembly);
+        return Verifier.Verify("Foo", settings);
+    }
+    [Fact]
+    public Task AssemblyConfigurationFluent()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForAssemblyConfiguration();
+    }
+
+    [Fact]
+    public Task AssemblyConfigurationFluentWithAssembly()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForAssemblyConfiguration(typeof(ClassBeingTested).Assembly);
+    }
 
     #region UseTextForParameters
 
@@ -215,10 +334,24 @@ public class NamerTests
     }
 
     [Fact]
+    public Task ArchitectureFluent()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForArchitecture();
+    }
+
+    [Fact]
     public Task OSPlatform()
     {
         var settings = new VerifySettings();
         settings.UniqueForOSPlatform();
         return Verifier.Verify("Foo", settings);
+    }
+
+    [Fact]
+    public Task OSPlatformFluent()
+    {
+        return Verifier.Verify("Foo")
+            .UniqueForOSPlatform();
     }
 }

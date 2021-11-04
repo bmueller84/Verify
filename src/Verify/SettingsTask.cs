@@ -25,7 +25,7 @@ public class SettingsTask
         CurrentSettings.AddExtraSettings(action);
         return this;
     }
-        
+
     /// <summary>
     /// Retrieves the value passed into <see cref="UseExtension"/>, if it exists.
     /// </summary>
@@ -96,7 +96,37 @@ public class SettingsTask
     }
 
     /// <summary>
-    /// Use the current assembly configuration (debug/release) to make the test results unique.
+    /// Use the current runtime to make the test results unique.
+    /// Used when a test produces different results based on runtime.
+    /// </summary>
+    public SettingsTask UniqueForRuntime()
+    {
+        CurrentSettings.UniqueForRuntime();
+        return this;
+    }
+
+    /// <summary>
+    /// Use the current test assembly TargetFrameworkAttribute to make the test results unique.
+    /// Used when a test produces different results based on TargetFramework.
+    /// </summary>
+    public SettingsTask UniqueForTargetFramework()
+    {
+        CurrentSettings.UniqueForTargetFramework();
+        return this;
+    }
+
+    /// <summary>
+    /// Use the current test assembly TargetFrameworkAttribute name and version to make the test results unique.
+    /// Used when a test produces different results based on TargetFramework and TargetFramework version.
+    /// </summary>
+    public SettingsTask UniqueForTargetFrameworkAndVersion()
+    {
+        CurrentSettings.UniqueForTargetFrameworkAndVersion();
+        return this;
+    }
+
+    /// <summary>
+    /// Use the current test assembly configuration (debug/release) to make the test results unique.
     /// Used when a test produces different results based on assembly configuration.
     /// </summary>
     public SettingsTask UniqueForAssemblyConfiguration()
@@ -104,14 +134,43 @@ public class SettingsTask
         CurrentSettings.UniqueForAssemblyConfiguration();
         return this;
     }
+    
+    /// <summary>
+    /// Use <paramref name="assembly"/> TargetFrameworkAttribute to make the test results unique.
+    /// Used when a test produces different results based on TargetFramework.
+    /// </summary>
+    public SettingsTask UniqueForTargetFramework(Assembly assembly)
+    {
+        CurrentSettings.UniqueForTargetFramework(assembly);
+        return this;
+    }
 
     /// <summary>
-    /// Use the current runtime to make the test results unique.
-    /// Used when a test produces different results based on runtime.
+    /// Use the <paramref name="assembly"/> TargetFrameworkAttribute name and version to make the test results unique.
+    /// Used when a test produces different results based on TargetFramework and TargetFramework version.
     /// </summary>
-    public SettingsTask UniqueForRuntime()
+    public SettingsTask UniqueForTargetFrameworkAndVersion(Assembly assembly)
     {
-        CurrentSettings.UniqueForRuntime();
+        CurrentSettings.UniqueForTargetFrameworkAndVersion(assembly);
+        return this;
+    }
+
+    /// <summary>
+    /// Use the <paramref name="assembly"/> configuration (debug/release) to make the test results unique.
+    /// Used when a test produces different results based on assembly configuration.
+    /// </summary>
+    public SettingsTask UniqueForAssemblyConfiguration(Assembly assembly)
+    {
+        CurrentSettings.UniqueForAssemblyConfiguration(assembly);
+        return this;
+    }
+
+    /// <summary>
+    /// Allow multiple tests to map to the same snapshot file prefix.
+    /// </summary>
+    public SettingsTask DisableRequireUniquePrefix()
+    {
+        CurrentSettings.DisableRequireUniquePrefix();
         return this;
     }
 
@@ -252,9 +311,9 @@ public class SettingsTask
     /// <summary>
     /// Automatically accept the results of the current test.
     /// </summary>
-    public SettingsTask AutoVerify()
+    public SettingsTask AutoVerify(bool includeBuildServer = true)
     {
-        CurrentSettings.AutoVerify();
+        CurrentSettings.AutoVerify(includeBuildServer);
         return this;
     }
 

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using SimpleInfoName;
 using VerifyTests;
 
 class CustomContractResolver :
@@ -9,6 +10,7 @@ class CustomContractResolver :
     bool ignoreFalse;
     bool includeObsoletes;
     bool scrubNumericIds;
+    IsNumericId isNumericId;
     IReadOnlyDictionary<Type, List<string>> ignoredMembers;
     IReadOnlyList<string> ignoredByNameMembers;
     IReadOnlyList<Type> ignoredTypes;
@@ -22,6 +24,7 @@ class CustomContractResolver :
         bool ignoreFalse,
         bool includeObsoletes,
         bool scrubNumericIds,
+        IsNumericId isNumericId,
         IReadOnlyDictionary<Type, List<string>> ignoredMembers,
         IReadOnlyList<string> ignoredByNameMembers,
         IReadOnlyList<Type> ignoredTypes,
@@ -34,6 +37,7 @@ class CustomContractResolver :
         this.ignoreFalse = ignoreFalse;
         this.includeObsoletes = includeObsoletes;
         this.scrubNumericIds = scrubNumericIds;
+        this.isNumericId = isNumericId;
         this.ignoredMembers = ignoredMembers;
         this.ignoredByNameMembers = ignoredByNameMembers;
         this.ignoredTypes = ignoredTypes;
@@ -117,7 +121,7 @@ class CustomContractResolver :
                 throw new($"Could not load type `{value}`.");
             }
 
-            return TypeNameConverter.GetName(type);
+            return type.SimpleName();
         }
 
         return value;
@@ -162,15 +166,15 @@ class CustomContractResolver :
             return property;
         }
 
-        if (scrubNumericIds && member.Name.EndsWith("Id"))
+        var underlyingType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+        if (
+            underlyingType == typeof(int) ||
+            underlyingType == typeof(long) ||
+            underlyingType == typeof(uint) ||
+            underlyingType == typeof(ulong)
+        )
         {
-            var underlyingType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
-            if (
-                underlyingType == typeof(int) ||
-                underlyingType == typeof(long) ||
-                underlyingType == typeof(uint) ||
-                underlyingType == typeof(ulong)
-                )
+            if (scrubNumericIds && isNumericId(member))
             {
                 property.Converter = new IdConverter();
                 return property;

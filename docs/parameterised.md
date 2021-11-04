@@ -52,7 +52,7 @@ public Task InlineDataUsageFluent(string arg)
         .UseParameters(arg);
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L8-L29' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitinlinedata' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L37-L58' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitinlinedata' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -84,7 +84,7 @@ public static IEnumerable<object[]> GetData()
     yield return new object[] {"Value2"};
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L31-L56' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitmemberdata' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L60-L85' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitmemberdata' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -160,7 +160,7 @@ public Task TestCaseUsage(string arg)
     return Verifier.Verify(arg);
 }
 ```
-<sup><a href='/src/Verify.NUnit.Tests/Snippets/ParametersSample.cs#L7-L14' title='Snippet source file'>snippet source</a> | <a href='#snippet-nunittestcase' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.NUnit.Tests/Snippets/ParametersSample.cs#L28-L37' title='Snippet source file'>snippet source</a> | <a href='#snippet-nunittestcase' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -232,7 +232,7 @@ public Task UseTextForParametersFluent(string arg)
         .UseTextForParameters(arg);
 }
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L169-L190' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetextforparameters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L288-L309' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetextforparameters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Results in:

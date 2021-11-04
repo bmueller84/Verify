@@ -28,7 +28,7 @@ partial class InnerVerifier :
         }
 
         var filePathPrefix = Path.Combine(directory, fileNamePrefix);
-        PrefixUnique.CheckPrefixIsUnique(filePathPrefix);
+        ValidatePrefix(settings, filePathPrefix);
 
         var pattern = $"{fileNamePrefix}.*.*";
         var files = Directory.EnumerateFiles(directory, pattern).ToList();
@@ -44,6 +44,16 @@ partial class InnerVerifier :
         }
 
         VerifierSettings.RunBeforeCallbacks();
+    }
+
+    static void ValidatePrefix(VerifySettings settings, string filePathPrefix)
+    {
+        if (settings.UniquePrefixDisabled || VerifierSettings.UniquePrefixDisabled)
+        {
+            return;
+        }
+
+        PrefixUnique.CheckPrefixIsUnique(filePathPrefix);
     }
 
     public void Dispose()
