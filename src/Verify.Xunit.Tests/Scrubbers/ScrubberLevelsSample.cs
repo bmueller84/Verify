@@ -1,8 +1,4 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-#region ScrubberLevelsSampleXunit
+﻿#region ScrubberLevelsSampleXunit
 
 [UsesVerify]
 public class ScrubberLevelsSample
@@ -20,13 +16,13 @@ public class ScrubberLevelsSample
     {
         var settings = new VerifySettings(classLevelSettings);
         settings.AddScrubber(s => s.Replace("Two", "B"));
-        return Verifier.Verify("One Two Three", settings);
+        return Verify("One Two Three", settings);
     }
 
     [Fact]
     public Task UsageFluent()
     {
-        return Verifier.Verify("One Two Three", classLevelSettings)
+        return Verify("One Two Three", classLevelSettings)
             .AddScrubber(s => s.Replace("Two", "B"));
     }
 

@@ -1,18 +1,15 @@
-﻿using NUnit.Framework;
-using VerifyNUnit;
-
-[TestFixture]
+﻿[TestFixture]
 public class Base
 {
     [Test]
     public Task TestInBase()
     {
-        return Verifier.Verify("Foo");
+        return Verify("Foo");
     }
 
     [Test]
     public virtual Task TestToOverride()
     {
-        return Verifier.Verify("Foo");
+        return Verify("Foo");
     }
 }

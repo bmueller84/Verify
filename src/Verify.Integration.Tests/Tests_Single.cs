@@ -1,8 +1,5 @@
 ﻿#if DEBUG
 using DiffEngine;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 
 public partial class Tests
 {
@@ -89,16 +86,16 @@ public partial class Tests
         var projectDirectory = AttributeReader.GetProjectDirectory();
         var prefix = Path.Combine(projectDirectory, uniqueTestName);
         var danglingFile = Path.Combine(projectDirectory, $"{prefix}.01.verified.{extension}");
-        FilePair file = new(extension, prefix);
+        var file = new FilePair(extension, prefix);
 
-        DeleteAll(danglingFile, file.Verified, file.Received);
+        DeleteAll(danglingFile, file.VerifiedPath, file.ReceivedPath);
         await File.WriteAllTextAsync(danglingFile, "");
 
         if (hasExistingReceived)
         {
-            await File.WriteAllTextAsync(file.Received, "");
+            await File.WriteAllTextAsync(file.ReceivedPath, "");
         }
-        
+
         PrefixUnique.Clear();
         await InitialVerify(initialTarget, hasMatchingDiffTool, settings, file);
 
@@ -108,10 +105,10 @@ public partial class Tests
         }
 
         AssertNotExists(danglingFile);
-        
+
         PrefixUnique.Clear();
         await ReVerify(initialTarget, settings, file);
-        
+
         PrefixUnique.Clear();
         await InitialVerify(secondTarget, hasMatchingDiffTool, settings, file);
 
@@ -119,7 +116,7 @@ public partial class Tests
         {
             RunClipboardCommand();
         }
-        
+
         PrefixUnique.Clear();
         await ReVerify(secondTarget, settings, file);
     }
@@ -128,13 +125,13 @@ public partial class Tests
     {
         var command = BuildCommand(pair);
         ProcessCleanup.Refresh();
-        await Verifier.Verify(target(), settings);
+        await Verify(target(), settings);
         await Task.Delay(300);
         ProcessCleanup.Refresh();
         AssertProcessNotRunning(command);
 
-        AssertNotExists(pair.Received);
-        AssertExists(pair.Verified);
+        AssertNotExists(pair.ReceivedPath);
+        AssertExists(pair.VerifiedPath);
 
         await EnsureUtf8(pair);
     }
@@ -163,28 +160,28 @@ public partial class Tests
             }
         }
 
-        await Ensure(pair.Verified);
-        await Ensure(pair.Received);
+        await Ensure(pair.VerifiedPath);
+        await Ensure(pair.ReceivedPath);
     }
 
     static async Task InitialVerify(Func<object> target, bool hasMatchingDiffTool, VerifySettings settings, FilePair pair)
     {
         if (settings.autoVerify)
         {
-            await Verifier.Verify(target(), settings);
-            AssertExists(pair.Verified);
+            await Verify(target(), settings);
+            AssertExists(pair.VerifiedPath);
         }
         else
         {
-            await Throws(() => Verifier.Verify(target(), settings));
+            await Throws(() => Verify(target(), settings));
             ProcessCleanup.Refresh();
             AssertProcess(hasMatchingDiffTool, pair);
             if (hasMatchingDiffTool)
             {
-                AssertExists(pair.Verified);
+                AssertExists(pair.VerifiedPath);
             }
 
-            AssertExists(pair.Received);
+            AssertExists(pair.ReceivedPath);
         }
 
         await EnsureUtf8(pair);

@@ -22,13 +22,13 @@ This can be done using `AutoVerify()`:
 var settings = new VerifySettings();
 settings.AutoVerify();
 ```
-<sup><a href='/src/Verify.Tests/Snippets/Snippets.cs#L96-L101' title='Snippet source file'>snippet source</a> | <a href='#snippet-autoverify' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Snippets/Snippets.cs#L84-L89' title='Snippet source file'>snippet source</a> | <a href='#snippet-autoverify' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Note that auto accepted changes in `.verified.` files remain visible in source control tooling.
 
 
-### OnHandlers
+## OnHandlers
 
  * `OnVerify` takes two actions that are called before and after each verification.
  * `OnFirstVerify` is called when there is no verified file.
@@ -51,13 +51,18 @@ public Task OnHandlersSample()
     VerifierSettings.OnVerifyMismatch(
         (filePair, message) =>
         {
-            Debug.WriteLine(filePair.Received);
-            Debug.WriteLine(filePair.Verified);
+            Debug.WriteLine(filePair.ReceivedPath);
+            Debug.WriteLine(filePair.VerifiedPath);
             Debug.WriteLine(message);
             return Task.CompletedTask;
         });
-    return Verifier.Verify("value");
+    return Verify("value");
 }
 ```
-<sup><a href='/src/Verify.Tests/Snippets/Snippets.cs#L9-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-onhandlers' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Snippets/Snippets.cs#L6-L30' title='Snippet source file'>snippet source</a> | <a href='#snippet-onhandlers' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+
+## OmitContentFromException
+
+By default, when a verify mismatch occurs for text, the content of the received and verified files is included in the exception that is thrown. This results in that text being included in test runners and build output. To omit the content use `VerifierSettings.OmitContentFromException`.

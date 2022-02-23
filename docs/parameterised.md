@@ -40,7 +40,7 @@ public Task InlineDataUsage(string arg)
 {
     var settings = new VerifySettings();
     settings.UseParameters(arg);
-    return Verifier.Verify(arg, settings);
+    return Verify(arg, settings);
 }
 
 [Theory]
@@ -48,11 +48,11 @@ public Task InlineDataUsage(string arg)
 [InlineData("Value2")]
 public Task InlineDataUsageFluent(string arg)
 {
-    return Verifier.Verify(arg)
+    return Verify(arg)
         .UseParameters(arg);
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L37-L58' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitinlinedata' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L33-L54' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitinlinedata' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -67,14 +67,14 @@ public Task MemberDataUsage(string arg)
 {
     var settings = new VerifySettings();
     settings.UseParameters(arg);
-    return Verifier.Verify(arg, settings);
+    return Verify(arg, settings);
 }
 
 [Theory]
 [MemberData(nameof(GetData))]
 public Task MemberDataUsageFluent(string arg)
 {
-    return Verifier.Verify(arg)
+    return Verify(arg)
         .UseParameters(arg);
 }
 
@@ -84,7 +84,7 @@ public static IEnumerable<object[]> GetData()
     yield return new object[] {"Value2"};
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L60-L85' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitmemberdata' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/ParametersSample.cs#L56-L81' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitmemberdata' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -102,6 +102,7 @@ public class ComplexParametersSample
     public static void Initialize()
     {
         VerifierSettings.NameForParameter<ComplexData>(_ => _.Value);
+        VerifierSettings.NameForParameter<ComplexStructData>(_ => _.Value);
     }
 
     [Theory]
@@ -110,14 +111,31 @@ public class ComplexParametersSample
     {
         var settings = new VerifySettings();
         settings.UseParameters(arg);
-        return Verifier.Verify(arg, settings);
+        return Verify(arg, settings);
     }
 
     [Theory]
     [MemberData(nameof(GetComplexMemberData))]
     public Task ComplexMemberDataFluent(ComplexData arg)
     {
-        return Verifier.Verify(arg)
+        return Verify(arg)
+            .UseParameters(arg);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberData))]
+    public Task ComplexMemberNullableData(ComplexData? arg)
+    {
+        var settings = new VerifySettings();
+        settings.UseParameters(arg);
+        return Verify(arg, settings);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberData))]
+    public Task ComplexMemberNullableDataFluent(ComplexData? arg)
+    {
+        return Verify(arg)
             .UseParameters(arg);
     }
 
@@ -137,9 +155,65 @@ public class ComplexParametersSample
     {
         public string Value { get; set; } = null!;
     }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberStructData(ComplexStructData arg)
+    {
+        var settings = new VerifySettings();
+        settings.UseParameters(arg);
+        return Verify(arg, settings);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberStructDataFluent(ComplexStructData arg)
+    {
+        return Verify(arg)
+            .UseParameters(arg);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberNullableStructData(ComplexStructData? arg)
+    {
+        var settings = new VerifySettings();
+        settings.UseParameters(arg);
+        return Verify(arg, settings);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberNullableStructDataFluent(ComplexStructData? arg)
+    {
+        return Verify(arg)
+            .UseParameters(arg);
+    }
+
+    public static IEnumerable<object[]> GetComplexMemberStructData()
+    {
+        yield return new object[]
+        {
+            new ComplexStructData("Value1")
+        };
+        yield return new object[]
+        {
+            new ComplexStructData("Value2")
+        };
+    }
+
+    public struct ComplexStructData
+    {
+        public ComplexStructData(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; set; } = null!;
+    }
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/ComplexParametersSample.cs#L5-L49' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitcomplexmemberdata' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/ComplexParametersSample.cs#L1-L120' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitcomplexmemberdata' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 `VerifierSettings.NameForParameter` is required since the parameter type has no `ToString()` override that can be used for deriving the name of the `.verified.` file.
@@ -157,10 +231,10 @@ public class ComplexParametersSample
 [TestCase("Value2")]
 public Task TestCaseUsage(string arg)
 {
-    return Verifier.Verify(arg);
+    return Verify(arg);
 }
 ```
-<sup><a href='/src/Verify.NUnit.Tests/Snippets/ParametersSample.cs#L28-L37' title='Snippet source file'>snippet source</a> | <a href='#snippet-nunittestcase' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.NUnit.Tests/Snippets/ParametersSample.cs#L25-L34' title='Snippet source file'>snippet source</a> | <a href='#snippet-nunittestcase' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -198,7 +272,7 @@ public class ParametersSample :
     }
 }
 ```
-<sup><a href='/src/Verify.MSTest.Tests/Snippets/ParametersSample.cs#L7-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-mstestdatarow' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.MSTest.Tests/Snippets/ParametersSample.cs#L3-L29' title='Snippet source file'>snippet source</a> | <a href='#snippet-mstestdatarow' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -220,7 +294,7 @@ public Task UseTextForParameters(string arg)
 {
     var settings = new VerifySettings();
     settings.UseTextForParameters(arg);
-    return Verifier.Verify(arg, settings);
+    return Verify(arg, settings);
 }
 
 [Theory]
@@ -228,11 +302,11 @@ public Task UseTextForParameters(string arg)
 [InlineData("Value2")]
 public Task UseTextForParametersFluent(string arg)
 {
-    return Verifier.Verify(arg)
+    return Verify(arg)
         .UseTextForParameters(arg);
 }
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L288-L309' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetextforparameters' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L298-L319' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetextforparameters' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Results in:

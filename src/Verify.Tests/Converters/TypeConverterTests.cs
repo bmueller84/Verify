@@ -1,10 +1,6 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-#if DEBUG
+﻿#if NET6_0 && DEBUG
 using System.Drawing;
 using System.Drawing.Imaging;
-#endif
 
 [UsesVerify]
 public class TypeConverterTests
@@ -25,7 +21,7 @@ public class TypeConverterTests
         };
         var settings = new VerifySettings();
         settings.UseExtension("txt");
-        return Verifier.Verify(target, settings);
+        return Verify(target, settings);
     }
 
     class ParentClass
@@ -46,7 +42,7 @@ public class TypeConverterTests
         VerifierSettings.RegisterFileConverter<TargetForCleanup>(
             (_, _) =>
             {
-                #region ConversionResultWithCleanup
+#region ConversionResultWithCleanup
 
                 return new(
                     info: info,
@@ -58,13 +54,13 @@ public class TypeConverterTests
                         return Task.CompletedTask;
                     });
 
-                #endregion
+#endregion
             });
         var target = new TargetForCleanup
         {
             Value = "line1"
         };
-        await Verifier.Verify(target);
+        await Verify(target);
         Assert.False(File.Exists(filePath));
     }
 
@@ -87,7 +83,7 @@ public class TypeConverterTests
         {
             Value = $"line1{Environment.NewLine}line2"
         };
-        return Verifier.Verify(target);
+        return Verify(target);
     }
 
     public class ClassToSplit
@@ -110,7 +106,7 @@ public class TypeConverterTests
         {
             Value = "Invalid"
         };
-        return Verifier.Verify(target);
+        return Verify(target);
     }
 
     [ModuleInitializer]
@@ -128,7 +124,7 @@ public class TypeConverterTests
         {
             Value = "Valid"
         };
-        return Verifier.Verify(target);
+        return Verify(target);
     }
 
     class CanConvertTarget
@@ -136,7 +132,6 @@ public class TypeConverterTests
         public string Value { get; set; } = null!;
     }
 
-#if DEBUG
     [ModuleInitializer]
     public static void WithInfoInit()
     {
@@ -167,8 +162,8 @@ public class TypeConverterTests
                 ["name"] = nameof(WithInfo)
             }
         };
-        Bitmap bitmap = new(FileHelpers.OpenRead("sample.bmp"));
-        return Verifier.Verify(bitmap, settings);
+        var bitmap = new Bitmap(IoHelpers.OpenRead("sample.bmp"));
+        return Verify(bitmap, settings);
     }
 
     [ModuleInitializer]
@@ -200,9 +195,9 @@ public class TypeConverterTests
                 ["name"] = nameof(WithInfoShouldRespectSettings)
             }
         };
-        settings.ModifySerialization(_ => { _.IgnoreMember("Property"); });
-        Bitmap bitmap = new(FileHelpers.OpenRead("sample.bmp"));
-        return Verifier.Verify(bitmap, settings);
+        settings.ModifySerialization(_ => _.IgnoreMember("Property"));
+        var bitmap = new Bitmap(IoHelpers.OpenRead("sample.bmp"));
+        return Verify(bitmap, settings);
     }
 
     [ModuleInitializer]
@@ -230,8 +225,8 @@ public class TypeConverterTests
                 ["name"] = nameof(TypeConversion)
             }
         };
-        Bitmap bitmap = new(FileHelpers.OpenRead("sample.bmp"));
-        return Verifier.Verify(bitmap, settings);
+        var bitmap = new Bitmap(IoHelpers.OpenRead("sample.bmp"));
+        return Verify(bitmap, settings);
     }
 
     static IEnumerable<Stream> ConvertBmpTpPngStreams(Bitmap bitmap)
@@ -240,5 +235,5 @@ public class TypeConverterTests
         bitmap.Save(stream, ImageFormat.Png);
         yield return stream;
     }
-#endif
 }
+#endif

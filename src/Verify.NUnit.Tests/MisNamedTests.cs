@@ -1,12 +1,9 @@
-﻿using NUnit.Framework;
-using VerifyNUnit;
-
-[TestFixture]
+﻿[TestFixture]
 public class DiffNamedTests
 {
     [Test]
     public Task ShouldPass()
     {
-        return Verifier.Verify("Foo");
+        return Verify("Foo");
     }
 }

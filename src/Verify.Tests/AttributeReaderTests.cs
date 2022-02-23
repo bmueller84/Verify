@@ -1,15 +1,11 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class AttributeReaderTests
 {
     [Fact]
     public Task Simple()
     {
         var assembly = typeof(AttributeReaderTests).Assembly;
-        return Verifier.Verify(
+        return Verify(
             new
             {
                 ProjectDirectory = AttributeReader.GetProjectDirectory(assembly),

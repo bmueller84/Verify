@@ -1,12 +1,9 @@
-﻿using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class VerifyTextSample
 {
     [Fact]
     public Task Simple()
     {
-        return Verifier.Verify("Foo");
+        return Verify("Foo");
     }
 }

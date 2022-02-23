@@ -1,8 +1,4 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class ExtensionConverterTests
 {
     [ModuleInitializer]
@@ -16,7 +12,7 @@ public class ExtensionConverterTests
     [Fact]
     public Task TextSplit()
     {
-        return Verifier.Verify(FileHelpers.OpenRead("sample.split"))
+        return Verify(IoHelpers.OpenRead("sample.split"))
             .UseExtension("txt");
     }
 
@@ -31,7 +27,7 @@ public class ExtensionConverterTests
     [Fact]
     public Task ExtensionConversionStringBuilder()
     {
-        return Verifier.Verify(new MemoryStream())
+        return Verify(new MemoryStream())
             .UseExtension("ExtensionConversionStringBuilder");
     }
 
@@ -46,7 +42,7 @@ public class ExtensionConverterTests
     [Fact]
     public Task ExtensionConversion()
     {
-        return Verifier.Verify(new MemoryStream())
+        return Verify(new MemoryStream())
             .UseExtension("ExtensionConversion");
     }
 
@@ -61,7 +57,7 @@ public class ExtensionConverterTests
     [Fact]
     public Task AsyncExtensionConversion()
     {
-        return Verifier.Verify(new MemoryStream())
+        return Verify(new MemoryStream())
             .UseExtension("AsyncExtensionConversion");
     }
 
@@ -83,7 +79,7 @@ public class ExtensionConverterTests
     [Fact]
     public Task WithInfo()
     {
-        return Verifier.Verify(new MemoryStream())
+        return Verify(new MemoryStream())
             .UseExtension("WithInfo");
     }
 }

@@ -1,9 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Xml;
+﻿using System.Xml;
 using System.Xml.Linq;
-using Newtonsoft.Json;
-using SimpleInfoName;
 
 // ReSharper disable UnusedParameter.Local
 
@@ -60,16 +56,16 @@ public static partial class VerifierSettings
     {
         #region typeToStringMapping
 
-        { typeof(string), (target, _) => (string)target },
-        { typeof(StringBuilder), (target, _) => ((StringBuilder)target).ToString() },
-        { typeof(bool), (target, _) => ((bool)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(short), (target, _) => ((short)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(ushort), (target, _) => ((ushort)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(int), (target, _) => ((int)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(uint), (target, _) => ((uint)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(long), (target, _) => ((long)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(ulong), (target, _) => ((ulong)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(decimal), (target, _) => ((decimal)target).ToString(CultureInfo.InvariantCulture) },
+        {typeof(string), (target, _) => (string) target},
+        {typeof(StringBuilder), (target, _) => ((StringBuilder) target).ToString()},
+        {typeof(bool), (target, _) => ((bool) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(short), (target, _) => ((short) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(ushort), (target, _) => ((ushort) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(int), (target, _) => ((int) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(uint), (target, _) => ((uint) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(long), (target, _) => ((long) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(ulong), (target, _) => ((ulong) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(decimal), (target, _) => ((decimal) target).ToString(CultureInfo.InvariantCulture)},
 #if NET5_0_OR_GREATER
         {typeof(Half), (target, settings) => ((Half) target).ToString(CultureInfo.InvariantCulture)},
 #endif
@@ -89,27 +85,27 @@ public static partial class VerifierSettings
             }
         },
 #endif
-        { typeof(float), (target, _) => ((float)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(double), (target, _) => ((double)target).ToString(CultureInfo.InvariantCulture) },
-        { typeof(Guid), (target, _) => ((Guid)target).ToString() },
+        {typeof(float), (target, _) => ((float) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(double), (target, _) => ((double) target).ToString(CultureInfo.InvariantCulture)},
+        {typeof(Guid), (target, _) => ((Guid) target).ToString()},
         {
             typeof(DateTime), (target, _) =>
             {
-                var dateTime = (DateTime)target;
+                var dateTime = (DateTime) target;
                 return dateTime.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFz");
             }
         },
         {
             typeof(DateTimeOffset), (target, _) =>
             {
-                var dateTimeOffset = (DateTimeOffset)target;
+                var dateTimeOffset = (DateTimeOffset) target;
                 return dateTimeOffset.ToString("yyyy-MM-ddTHH:mm:ss.FFFFFFFz", CultureInfo.InvariantCulture);
             }
         },
         {
             typeof(XmlNode), (target, settings) =>
             {
-                var converted = (XmlNode)target;
+                var converted = (XmlNode) target;
                 var document = XDocument.Parse(converted.OuterXml);
                 return new(document.ToString(), "xml");
             }
@@ -117,15 +113,34 @@ public static partial class VerifierSettings
         {
             typeof(XDocument), (target, settings) =>
             {
-                var converted = (XDocument)target;
+                var converted = (XDocument) target;
                 return new(converted.ToString(), "xml");
             }
         },
         {
             typeof(XElement), (target, settings) =>
             {
-                var converted = (XElement)target;
+                var converted = (XElement) target;
                 return new(converted.ToString(), "xml");
+            }
+        },
+        {
+            typeof(XmlDocument), (target, settings) =>
+            {
+                var xmlDocument = (XmlDocument) target;
+                var stringBuilder = new StringBuilder();
+                var writerSettings = new XmlWriterSettings
+                {
+                    Indent = true,
+                    IndentChars = "  ",
+                    NewLineChars = "\r\n",
+                    NewLineHandling = NewLineHandling.Replace
+                };
+                using (var writer = XmlWriter.Create(stringBuilder, writerSettings))
+                {
+                    xmlDocument.Save(writer);
+                }
+                return new(stringBuilder.ToString(), "xml");
             }
         }
 
@@ -143,34 +158,37 @@ public static partial class VerifierSettings
 
             return new(target.ToString()!);
         };
-        typeToString[typeof(T)] = (target, settings) => toString((T)target, settings);
+        typeToString[typeof(T)] = (target, settings) => toString((T) target, settings);
     }
 
     public static void AddExtraSettings(Action<JsonSerializerSettings> action)
     {
         serialization.AddExtraSettings(action);
-        serialization.RegenSettings();
     }
 
     public static void ModifySerialization(Action<SerializationSettings> action)
     {
         action(serialization);
-        serialization.RegenSettings();
+    }
+
+    public static void IgnoreStackTrack()
+    {
+        ModifySerialization(_ => _.IgnoreMember("StackTrace"));
     }
 
     public static void AddExtraDateFormat(string format)
     {
-        SharedScrubber.dateFormats.Add(format);
+        SerializationSettings.dateFormats.Add(format);
     }
 
     public static void AddExtraDatetimeFormat(string format)
     {
-        SharedScrubber.datetimeFormats.Add(format);
+        SerializationSettings.datetimeFormats.Add(format);
     }
 
     public static void AddExtraDatetimeOffsetFormat(string format)
     {
-        SharedScrubber.datetimeOffsetFormats.Add(format);
+        SerializationSettings.datetimeOffsetFormats.Add(format);
     }
 
     public static void UseStrictJson()
@@ -180,18 +198,18 @@ public static partial class VerifierSettings
 
     public static bool StrictJson { get; private set; }
 
-    internal static bool scrubProjectDirectory = true;
+    internal static bool scrubProjectDir = true;
 
     public static void DontScrubProjectDirectory()
     {
-        scrubProjectDirectory = false;
+        scrubProjectDir = false;
     }
 
-    internal static bool scrubSolutionDirectory = true;
+    internal static bool scrubSolutionDir = true;
 
     public static void DontScrubSolutionDirectory()
     {
-        scrubSolutionDirectory = false;
+        scrubSolutionDir = false;
     }
 
     internal static bool sortPropertiesAlphabetically;

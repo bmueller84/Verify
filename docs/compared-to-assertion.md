@@ -83,7 +83,7 @@ public void TraditionalTest()
     Assert.Equal("USA", person.Address.Country);
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/CompareToAssert.cs#L7-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-traditionaltest' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/CompareToAssert.cs#L4-L22' title='Snippet source file'>snippet source</a> | <a href='#snippet-traditionaltest' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -96,10 +96,10 @@ public void TraditionalTest()
 public Task SnapshotTest()
 {
     var person = ClassBeingTested.FindPerson();
-    return Verifier.Verify(person);
+    return Verify(person);
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/CompareToAssert.cs#L27-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-snapshottest' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/CompareToAssert.cs#L24-L33' title='Snippet source file'>snippet source</a> | <a href='#snippet-snapshottest' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Produces a snapshot file `SnapshotTest.verified.txt`:

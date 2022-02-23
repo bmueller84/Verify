@@ -1,8 +1,4 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class LinesScrubberTests
 {
     [Fact]
@@ -10,7 +6,7 @@ public class LinesScrubberTests
     {
         var settings = new VerifySettings();
         settings.ScrubLinesContaining("c", "D", "F");
-        return Verifier.Verify(
+        return Verify(
             settings: settings,
             target: @"a
 b
@@ -25,7 +21,7 @@ f");
     {
         var settings = new VerifySettings();
         settings.ScrubLines(removeLine: x => x.Contains("D"));
-        return Verifier.Verify(
+        return Verify(
             settings: settings,
             target:  @"b
 ");
@@ -36,7 +32,7 @@ f");
     {
         var settings = new VerifySettings();
         settings.ScrubLines(removeLine: x => x.Contains("D"));
-        return Verifier.Verify(
+        return Verify(
             settings: settings,
             target:  @"b
 
@@ -48,7 +44,7 @@ c");
     {
         var settings = new VerifySettings();
         settings.ScrubLines(removeLine: x => x.Contains("D"));
-        return Verifier.Verify(
+        return Verify(
             settings: settings,
             target:  @"a
 b
@@ -63,7 +59,7 @@ f");
     {
         var settings = new VerifySettings();
         settings.ScrubLinesContaining(StringComparison.Ordinal, "c", "D", "F");
-        return Verifier.Verify(
+        return Verify(
             settings: settings,
             target: @"a
 b

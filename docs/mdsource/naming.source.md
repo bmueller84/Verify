@@ -46,6 +46,14 @@ snippet: UseMethodNameFluent
 Will result in `TestClass.CustomMethodNameFluent.verified.txt`.
 
 
+
+### Multiple calls to Verify
+
+`UseMethodName` can also be used to allow multiple calls to Verify in the same method:
+
+snippet: MultipleCalls
+
+
 ## UseFileName
 
 To fully control the `{TestClassName}.{TestMethodName}_{Parameters}` parts of the file use `UseFileName`:
@@ -165,3 +173,9 @@ A `DerivePathInfo` convention can be shipped as a NuGet, for example [Spectre.Ve
 ### Default DerivePathInfo
 
 snippet: defaultDerivePathInfo
+
+
+## DisableRequireUniquePrefix
+
+Snapshot file names have to be unique. If a duplicate name is used, then an exception will be throw. This is mostly caused by a conflicting combination of `VerifierSettings.DerivePathInfo()`, `UseMethodName.UseDirectory()`, `UseMethodName.UseTypeName()`, and `UseMethodName.UseMethodName()`. If that's not the case, and having multiple identical prefixes is acceptable, then call `VerifierSettings.DisableRequireUniquePrefix()` to disable this uniqueness validation
+

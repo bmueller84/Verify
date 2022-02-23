@@ -1,9 +1,6 @@
-﻿#if DEBUG
+﻿#if DEBUG && NET6_0
 using System.Drawing;
 using System.Drawing.Imaging;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 // ReSharper disable UnusedParameter.Local
 
 [UsesVerify]
@@ -49,7 +46,7 @@ public class ConverterSnippets
         #region FileConverterTypeVerify
 
         using var stream = File.OpenRead("sample.tif");
-        await Verifier.Verify(Image.FromStream(stream));
+        await Verify(Image.FromStream(stream));
 
         #endregion
     }
@@ -89,7 +86,7 @@ public class ConverterSnippets
 
         #region FileConverterExtensionVerify
 
-        await Verifier.VerifyFile("sample.tif");
+        await VerifyFile("sample.tif");
 
         #endregion
     }

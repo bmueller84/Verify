@@ -34,7 +34,7 @@ static Task<CompareResult> CompareImages(
     return Task.FromResult(result);
 }
 ```
-<sup><a href='/src/Verify.Tests/Snippets/ComparerSnippets.cs#L42-L59' title='Snippet source file'>snippet source</a> | <a href='#snippet-imagecomparer' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Snippets/ComparerSnippets.cs#L39-L56' title='Snippet source file'>snippet source</a> | <a href='#snippet-imagecomparer' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 The returned `CompareResult.NotEqual` takes an optional message that will be rendered in the resulting text displayed to the user on test failure.
@@ -53,18 +53,18 @@ public Task InstanceComparer()
     var settings = new VerifySettings();
     settings.UseStreamComparer(CompareImages);
     settings.UseExtension("png");
-    return Verifier.VerifyFile("sample.png", settings);
+    return VerifyFile("sample.png", settings);
 }
 
 [Fact]
 public Task InstanceComparerFluent()
 {
-    return Verifier.VerifyFile("sample.png")
+    return VerifyFile("sample.png")
         .UseStreamComparer(CompareImages)
         .UseExtension("png");
 }
 ```
-<sup><a href='/src/Verify.Tests/Snippets/ComparerSnippets.cs#L9-L28' title='Snippet source file'>snippet source</a> | <a href='#snippet-instancecomparer' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Snippets/ComparerSnippets.cs#L6-L25' title='Snippet source file'>snippet source</a> | <a href='#snippet-instancecomparer' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -76,9 +76,9 @@ public Task InstanceComparerFluent()
 VerifierSettings.RegisterStreamComparer(
     extension: "png",
     compare: CompareImages);
-await Verifier.VerifyFile("TheImage.png");
+await VerifyFile("TheImage.png");
 ```
-<sup><a href='/src/Verify.Tests/Snippets/ComparerSnippets.cs#L32-L39' title='Snippet source file'>snippet source</a> | <a href='#snippet-staticcomparer' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Snippets/ComparerSnippets.cs#L29-L36' title='Snippet source file'>snippet source</a> | <a href='#snippet-staticcomparer' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -87,9 +87,13 @@ await Verifier.VerifyFile("TheImage.png");
 <!-- snippet: DefualtCompare -->
 <a id='snippet-defualtcompare'></a>
 ```cs
-static async Task<CompareResult> StreamsAreEqual(Stream stream1, Stream stream2)
+const int bufferSize = 1024 * sizeof(long);
+
+public static async Task<CompareResult> AreEqual(Stream stream1, Stream stream2)
 {
-    const int bufferSize = 1024 * sizeof(long);
+    EnsureAtStart(stream1);
+    EnsureAtStart(stream2);
+
     var buffer1 = new byte[bufferSize];
     var buffer2 = new byte[bufferSize];
 
@@ -116,6 +120,15 @@ static async Task<CompareResult> StreamsAreEqual(Stream stream1, Stream stream2)
     }
 }
 
+static void EnsureAtStart(Stream stream)
+{
+    if (stream.CanSeek &&
+        stream.Position != 0)
+    {
+        throw new("Expected stream to be at position 0.");
+    }
+}
+
 static async Task<int> ReadBufferAsync(Stream stream, byte[] buffer)
 {
     var bytesRead = 0;
@@ -134,7 +147,7 @@ static async Task<int> ReadBufferAsync(Stream stream, byte[] buffer)
     return bytesRead;
 }
 ```
-<sup><a href='/src/Verify/Compare/FileComparer.cs#L70-L119' title='Snippet source file'>snippet source</a> | <a href='#snippet-defualtcompare' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify/Compare/StreamComparer.cs#L3-L65' title='Snippet source file'>snippet source</a> | <a href='#snippet-defualtcompare' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -143,5 +156,7 @@ static async Task<int> ReadBufferAsync(Stream stream, byte[] buffer)
  * [Verify.AngleSharp.Diffing](https://github.com/VerifyTests/Verify.AngleSharp.Diffing): Comparison of html files via [AngleSharp.Diffing](https://github.com/AngleSharp/AngleSharp.Diffing).
  * [Verify.DiffPlex](https://github.com/VerifyTests/Verify.DiffPlex): Comparison of text via [DiffPlex](https://github.com/mmanela/diffplex).
  * [Verify.ICSharpCode.Decompiler](https://github.com/VerifyTests/Verify.ICSharpCode.Decompiler): Comparison of assemblies and types via [ICSharpCode.Decompiler](https://github.com/icsharpcode/ILSpy/wiki/Getting-Started-With-ICSharpCode.Decompiler).
+ * [Verify.ImageHash](https://github.com/VerifyTests/Verify.ImageHash): Comparison of images via [ImageHash](https://github.com/coenm/ImageHash).
  * [Verify.ImageMagick](https://github.com/VerifyTests/Verify.ImageMagick): Verification and comparison of images via [Magick.NET](https://github.com/dlemstra/Magick.NET).
- * [Verify.Phash](https://github.com/VerifyTests/Verify.Phash): Comparison of documents via [Phash](https://github.com/pgrho/phash).
+ * [Verify.Phash](https://github.com/VerifyTests/Verify.Phash): Comparison of images via [Phash](https://github.com/pgrho/phash).
+ * [Verify.Quibble](https://github.com/VerifyTests/Verify.Quibble): Comparison of objects via [Quibble](https://github.com/nrkno/Quibble).

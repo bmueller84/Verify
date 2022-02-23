@@ -1,6 +1,4 @@
-﻿using VerifyTests;
-
-static class PrefixUnique
+﻿static class PrefixUnique
 {
     static ConcurrentBag<string> prefixList = new();
 
@@ -51,7 +49,7 @@ If that's not the case, and having multiple identical prefixes is acceptable, th
                 builder.Append($".{Namer.TargetFrameworkNameAndVersion}");
                 return;
             }
-            
+
             var name = assembly.FrameworkName();
 
             if (name == null)
@@ -74,7 +72,7 @@ If that's not the case, and having multiple identical prefixes is acceptable, th
                 builder.Append($".{Namer.TargetFrameworkName}");
                 return;
             }
-            
+
             var name = assembly.FrameworkName();
 
             if (name == null)

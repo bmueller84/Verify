@@ -25,18 +25,18 @@ The directory that contains the test. A custom directory can be used via `UseDir
 ```cs
 var settings = new VerifySettings();
 settings.UseDirectory("CustomDirectory");
-await Verifier.Verify("value", settings);
+await Verify("value", settings);
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L183-L189' title='Snippet source file'>snippet source</a> | <a href='#snippet-usedirectory' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L193-L199' title='Snippet source file'>snippet source</a> | <a href='#snippet-usedirectory' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 <!-- snippet: UseDirectoryFluent -->
 <a id='snippet-usedirectoryfluent'></a>
 ```cs
-await Verifier.Verify("value")
+await Verify("value")
     .UseDirectory("CustomDirectory");
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L195-L200' title='Snippet source file'>snippet source</a> | <a href='#snippet-usedirectoryfluent' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L205-L210' title='Snippet source file'>snippet source</a> | <a href='#snippet-usedirectoryfluent' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Will result in `CustomDirectory/TypeName.MethodName.verified.txt`.
@@ -53,18 +53,18 @@ The class name that contains the test. A custom test name can be used via `UseTy
 ```cs
 var settings = new VerifySettings();
 settings.UseTypeName("CustomTypeName");
-await Verifier.Verify("value", settings);
+await Verify("value", settings);
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L206-L212' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetypename' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L216-L222' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetypename' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 <!-- snippet: UseTypeNameFluent -->
 <a id='snippet-usetypenamefluent'></a>
 ```cs
-await Verifier.Verify("value")
+await Verify("value")
     .UseTypeName("CustomTypeName");
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L218-L223' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetypenamefluent' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L228-L233' title='Snippet source file'>snippet source</a> | <a href='#snippet-usetypenamefluent' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Will result in `CustomTypeName.MethodName.verified.txt`.
@@ -79,9 +79,9 @@ The test method name. A custom test name can be used via `UseMethodName`:
 ```cs
 var settings = new VerifySettings();
 settings.UseMethodName("CustomMethodName");
-await Verifier.Verify("value", settings);
+await Verify("value", settings);
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L229-L235' title='Snippet source file'>snippet source</a> | <a href='#snippet-usemethodname' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L239-L245' title='Snippet source file'>snippet source</a> | <a href='#snippet-usemethodname' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Will result in `TestClass.CustomMethodName.verified.txt`.
@@ -89,13 +89,35 @@ Will result in `TestClass.CustomMethodName.verified.txt`.
 <!-- snippet: UseMethodNameFluent -->
 <a id='snippet-usemethodnamefluent'></a>
 ```cs
-await Verifier.Verify("value")
+await Verify("value")
     .UseMethodName("CustomMethodNameFluent");
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L241-L246' title='Snippet source file'>snippet source</a> | <a href='#snippet-usemethodnamefluent' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L251-L256' title='Snippet source file'>snippet source</a> | <a href='#snippet-usemethodnamefluent' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Will result in `TestClass.CustomMethodNameFluent.verified.txt`.
+
+
+
+### Multiple calls to Verify
+
+`UseMethodName` can also be used to allow multiple calls to Verify in the same method:
+
+<!-- snippet: MultipleCalls -->
+<a id='snippet-multiplecalls'></a>
+```cs
+[Fact]
+public async Task MultipleCalls()
+{
+    await Task.WhenAll(
+        Verify("Value1")
+            .UseMethodName("MultipleCalls_1"),
+        Verify("Value1")
+            .UseMethodName("MultipleCalls_2"));
+}
+```
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L54-L66' title='Snippet source file'>snippet source</a> | <a href='#snippet-multiplecalls' title='Start of snippet'>anchor</a></sup>
+<!-- endSnippet -->
 
 
 ## UseFileName
@@ -107,9 +129,9 @@ To fully control the `{TestClassName}.{TestMethodName}_{Parameters}` parts of th
 ```cs
 var settings = new VerifySettings();
 settings.UseFileName("CustomFileName");
-await Verifier.Verify("value", settings);
+await Verify("value", settings);
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L151-L157' title='Snippet source file'>snippet source</a> | <a href='#snippet-usefilename' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L161-L167' title='Snippet source file'>snippet source</a> | <a href='#snippet-usefilename' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Will result in `CustomFileName.verified.txt`.
@@ -117,10 +139,10 @@ Will result in `CustomFileName.verified.txt`.
 <!-- snippet: UseFileNameFluent -->
 <a id='snippet-usefilenamefluent'></a>
 ```cs
-await Verifier.Verify("value")
+await Verify("value")
     .UseFileName("CustomFileNameFluent");
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L172-L177' title='Snippet source file'>snippet source</a> | <a href='#snippet-usefilenamefluent' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L182-L187' title='Snippet source file'>snippet source</a> | <a href='#snippet-usefilenamefluent' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Will result in `UseFileNameFluent.verified.txt`.
@@ -155,13 +177,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntime();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task RuntimeFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForRuntime();
     }
 
@@ -170,7 +192,7 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntimeAndVersion();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
@@ -178,13 +200,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForAssemblyConfiguration();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task AssemblyConfigurationFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForAssemblyConfiguration();
     }
 
@@ -193,13 +215,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForArchitecture();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task ArchitectureFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForArchitecture();
     }
 
@@ -208,18 +230,18 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForOSPlatform();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task OSPlatformFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForOSPlatform();
     }
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/UniqueForSample.cs#L5-L79' title='Snippet source file'>snippet source</a> | <a href='#snippet-uniqueforsamplexunit' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/UniqueForSample.cs#L1-L75' title='Snippet source file'>snippet source</a> | <a href='#snippet-uniqueforsamplexunit' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -236,13 +258,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntime();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Test]
     public Task RuntimeFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForRuntime();
     }
 
@@ -251,13 +273,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForAssemblyConfiguration();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Test]
     public Task AssemblyConfigurationFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForAssemblyConfiguration();
     }
 
@@ -266,13 +288,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntimeAndVersion();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Test]
     public Task RuntimeAndVersionFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForRuntimeAndVersion();
     }
 
@@ -281,13 +303,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForArchitecture();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Test]
     public Task ArchitectureFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForArchitecture();
     }
 
@@ -296,18 +318,18 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForOSPlatform();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Test]
     public Task OSPlatformFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForOSPlatform();
     }
 }
 ```
-<sup><a href='/src/Verify.NUnit.Tests/Snippets/UniqueForSample.cs#L5-L86' title='Snippet source file'>snippet source</a> | <a href='#snippet-uniqueforsamplenunit' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.NUnit.Tests/Snippets/UniqueForSample.cs#L1-L82' title='Snippet source file'>snippet source</a> | <a href='#snippet-uniqueforsamplenunit' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -413,7 +435,7 @@ public class UniqueForSample :
     }
 }
 ```
-<sup><a href='/src/Verify.MSTest.Tests/Snippets/UniqueForSample.cs#L7-L89' title='Snippet source file'>snippet source</a> | <a href='#snippet-uniqueforsamplemstest' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.MSTest.Tests/Snippets/UniqueForSample.cs#L3-L85' title='Snippet source file'>snippet source</a> | <a href='#snippet-uniqueforsamplemstest' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -467,7 +489,7 @@ public class ExtensionSample
     {
         var settings = new VerifySettings(classLevelSettings);
         settings.UseExtension("xml");
-        return Verifier.Verify(
+        return Verify(
             target: @"
 <note>
   <to>Joe</to>
@@ -480,7 +502,7 @@ public class ExtensionSample
     [Fact]
     public Task AtMethodFluent()
     {
-        return Verifier.Verify(
+        return Verify(
                 target: @"
 <note>
   <to>Joe</to>
@@ -494,7 +516,7 @@ public class ExtensionSample
     [Fact]
     public Task SharedClassLevelSettings()
     {
-        return Verifier.Verify(
+        return Verify(
             target: @"
 {
   fruit: 'Apple',
@@ -505,7 +527,7 @@ public class ExtensionSample
     }
 }
 ```
-<sup><a href='/src/Verify.Xunit.Tests/Snippets/ExtensionSample.cs#L5-L61' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitextensionsample' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Xunit.Tests/Snippets/ExtensionSample.cs#L1-L57' title='Snippet source file'>snippet source</a> | <a href='#snippet-xunitextensionsample' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Result in two files:
@@ -545,7 +567,7 @@ To access the current Namer `Runtime` or `RuntimeAndVersion` strings use:
 Debug.WriteLine(Namer.Runtime);
 Debug.WriteLine(Namer.RuntimeAndVersion);
 ```
-<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L252-L257' title='Snippet source file'>snippet source</a> | <a href='#snippet-accessnamerruntimeandversion' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Naming/NamerTests.cs#L262-L267' title='Snippet source file'>snippet source</a> | <a href='#snippet-accessnamerruntimeandversion' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 
@@ -572,7 +594,7 @@ VerifierSettings.DerivePathInfo(
             methodName: method.Name);
     });
 ```
-<sup><a href='/src/Verify.Tests/Snippets/Snippets.cs#L61-L72' title='Snippet source file'>snippet source</a> | <a href='#snippet-derivepathinfo' title='Start of snippet'>anchor</a></sup>
+<sup><a href='/src/Verify.Tests/Snippets/Snippets.cs#L49-L60' title='Snippet source file'>snippet source</a> | <a href='#snippet-derivepathinfo' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
 
 Return null to any of the values to use the standard behavior. The returned path can be relative to the directory sourceFile exists in.
@@ -606,3 +628,9 @@ static DerivePathInfo derivePathInfo = (sourceFile, projectDirectory, type, meth
 ```
 <sup><a href='/src/Verify/DerivePaths/VerifierSettings.cs#L7-L24' title='Snippet source file'>snippet source</a> | <a href='#snippet-defaultderivepathinfo' title='Start of snippet'>anchor</a></sup>
 <!-- endSnippet -->
+
+
+## DisableRequireUniquePrefix
+
+Snapshot file names have to be unique. If a duplicate name is used, then an exception will be throw. This is mostly caused by a conflicting combination of `VerifierSettings.DerivePathInfo()`, `UseMethodName.UseDirectory()`, `UseMethodName.UseTypeName()`, and `UseMethodName.UseMethodName()`. If that's not the case, and having multiple identical prefixes is acceptable, then call `VerifierSettings.DisableRequireUniquePrefix()` to disable this uniqueness validation
+

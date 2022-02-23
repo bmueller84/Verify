@@ -1,8 +1,4 @@
-﻿using NUnit.Framework;
-using VerifyNUnit;
-using VerifyTests;
-
-#region ScrubbersSampleNUnit
+﻿#region ScrubbersSampleNUnit
 
 [TestFixture]
 public class ScrubbersSample
@@ -24,7 +20,7 @@ public class ScrubbersSample
         settings.ScrubLines(removeLine: line => line.Contains("J"));
         settings.ScrubLinesContaining("b", "D");
         settings.ScrubLinesContaining(StringComparison.Ordinal, "H");
-        return Verifier.Verify(
+        return Verify(
             settings: settings,
             target: @"
                     LineA
@@ -41,7 +37,7 @@ public class ScrubbersSample
     [Test]
     public Task LinesFluent()
     {
-        return Verifier.Verify(
+        return Verify(
                 target: @"
                         LineA
                         LineB
@@ -78,7 +74,7 @@ public class ScrubbersSample
         var settings = new VerifySettings();
         settings.AddScrubber(
             s => s.Replace("7D3", "TheRowVersion"));
-        return Verifier.Verify(target, settings);
+        return Verify(target, settings);
     }
 
     [Test]
@@ -89,7 +85,7 @@ public class ScrubbersSample
             RowVersion = "7D3"
         };
 
-        return Verifier.Verify(target)
+        return Verify(target)
             .AddScrubber(
                 s => s.Replace("7D3", "TheRowVersion"));
     }
@@ -97,7 +93,7 @@ public class ScrubbersSample
     [Test]
     public Task RemoveOrReplace()
     {
-        return Verifier.Verify(
+        return Verify(
                 target: @"
                         LineA
                         LineB
@@ -118,7 +114,7 @@ public class ScrubbersSample
     [Test]
     public Task EmptyLines()
     {
-        return Verifier.Verify(
+        return Verify(
                 target: @"
                         LineA
                         

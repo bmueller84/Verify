@@ -1,7 +1,4 @@
-﻿using NUnit.Framework;
-using VerifyNUnit;
-
-#region SampleTestNUnit
+﻿#region SampleTestNUnit
 
 [TestFixture]
 public class Sample
@@ -10,7 +7,7 @@ public class Sample
     public Task Test()
     {
         var person = ClassBeingTested.FindPerson();
-        return Verifier.Verify(person);
+        return Verify(person);
     }
 }
 #endregion

@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json;
-using NUnit.Framework;
-using VerifyTests;
-using VerifyNUnit;
 
 // Non-nullable field is uninitialized
 #pragma warning disable CS8618
@@ -13,7 +10,7 @@ public class VerifyObjectSamples
     {
         #region ChangeDefaultsPerVerification
 
-        await Verifier.Verify(target)
+        await Verify(target)
             .ModifySerialization(_ =>
             {
                 _.DontIgnoreEmptyCollections();
@@ -37,8 +34,8 @@ public class VerifyObjectSamples
 
         var settings = new VerifySettings();
         settings.ModifySerialization(_ => _.DontScrubDateTimes());
-        settings.AddExtraSettings(_ => _.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat);
-        await Verifier.Verify(person, settings);
+        settings.AddExtraSettings(_ => _.DefaultValueHandling = DefaultValueHandling.Include);
+        await Verify(person, settings);
     }
 
     [Test]
@@ -51,9 +48,9 @@ public class VerifyObjectSamples
             Dob = new(2000, 10, 1, 0, 0, 0, TimeSpan.Zero),
         };
 
-        await Verifier.Verify(person)
+        await Verify(person)
             .ModifySerialization(_ => _.DontScrubDateTimes())
-            .AddExtraSettings(_ => _.DateFormatHandling = DateFormatHandling.MicrosoftDateFormat);
+            .AddExtraSettings(_ => _.DefaultValueHandling = DefaultValueHandling.Include);
     }
 
     async Task Before()
@@ -72,7 +69,7 @@ public class VerifyObjectSamples
             }
         };
 
-        await Verifier.Verify(person);
+        await Verify(person);
 
         #endregion
     }
@@ -93,7 +90,7 @@ public class VerifyObjectSamples
             FamilyName = "Aguirre"
         };
 
-        await Verifier.Verify(
+        await Verify(
             new
             {
                 person1,
@@ -120,7 +117,7 @@ public class VerifyObjectSamples
             }
         };
 
-        await Verifier.Verify(person);
+        await Verify(person);
 
         #endregion
     }

@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VerifyTests;
-
-namespace VerifyMSTest;
+﻿namespace VerifyMSTest;
 
 [TestClass]
 public abstract partial class VerifyBase
@@ -24,7 +21,7 @@ public abstract partial class VerifyBase
         {
             testName = testName[(indexOf + 1)..];
         }
-            
+
         TargetAssembly.Assign(type.Assembly);
         var methodInfo = type
             .GetMethods(BindingFlags.Instance | BindingFlags.Public)
@@ -34,7 +31,7 @@ public abstract partial class VerifyBase
         {
             throw new($"Could not find method `{type.Name}.{testName}`.");
         }
-            
+
         GetFileConvention fileConvention = uniqueness => ReflectionFileNameBuilder.FileNamePrefix(methodInfo, type, sourceFile, settings, uniqueness);
         return new(sourceFile, settings, fileConvention);
     }

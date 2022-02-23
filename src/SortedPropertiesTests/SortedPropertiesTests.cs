@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 
 #region SortProperties
 static class ModuleInitializer
@@ -36,7 +33,7 @@ public class SortedPropertiesTests
             }
         };
 
-        return Verifier.Verify(person);
+        return Verify(person);
     }
     #endregion
 
@@ -58,7 +55,7 @@ public class SortedPropertiesTests
             }
         };
 
-        return Verifier.Verify(person)
+        return Verify(person)
             .AddExtraSettings(
                 _ => { _.TypeNameHandling = TypeNameHandling.All; });
     }

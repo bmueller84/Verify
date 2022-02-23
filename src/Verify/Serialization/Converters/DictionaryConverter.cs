@@ -1,7 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using Newtonsoft.Json;
-using VerifyTests;
+﻿using System.Collections.ObjectModel;
 
 class DictionaryConverter :
     WriteOnlyJsonConverter
@@ -27,14 +24,14 @@ class DictionaryConverter :
 
         var definition = type.GetGenericTypeDefinition();
         return definition == typeof(Dictionary<,>) ||
-               definition == typeof(ImmutableDictionary<,>) ||
+               definition.Name == "ImmutableDictionary`2" ||
                definition == typeof(SortedDictionary<,>) ||
-               definition == typeof(ImmutableSortedDictionary<,>) ||
+               definition.Name == "ImmutableSortedDictionary`2" ||
                definition == typeof(ConcurrentDictionary<,>) ||
                definition == typeof(ReadOnlyDictionary<,>);
     }
 
-    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer, IReadOnlyDictionary<string, object> context)
+    public override void Write(VerifyJsonWriter writer, object value)
     {
         var type = value.GetType();
 
@@ -43,7 +40,7 @@ class DictionaryConverter :
         var keyType = genericArguments.First();
         var definition = type.GetGenericTypeDefinition();
         if (definition == typeof(SortedDictionary<,>) ||
-            definition == typeof(ImmutableSortedDictionary<,>) )
+            definition.Name == "ImmutableSortedDictionary`2")
         {
             if (keyType == typeof(string))
             {
@@ -70,6 +67,6 @@ class DictionaryConverter :
             }
         }
 
-        serializer.Serialize(writer, value);
+        writer.Serialize(value);
     }
 }

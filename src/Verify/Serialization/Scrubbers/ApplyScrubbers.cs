@@ -1,97 +1,106 @@
-﻿using VerifyTests;
+﻿using System.Runtime.InteropServices;
 
 static class ApplyScrubbers
 {
-    static HashSet<string> currentDirectoryReplacements = new();
-    static string tempPath;
-    static string altTempPath;
-    static Action<StringBuilder> sharedReplacements = null!;
+    static char dirSeparator = Path.DirectorySeparatorChar;
+    static char altDirSeparator = Path.AltDirectorySeparatorChar;
+    static List<KeyValuePair<string, string>> replacements = null!;
 
-    static ApplyScrubbers()
+    static string ReplaceAltDirChar(this string directory)
     {
-        var baseDirectory = CleanPath(AppDomain.CurrentDomain.BaseDirectory);
-        var altBaseDirectory = baseDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        currentDirectoryReplacements.Add(baseDirectory);
-        currentDirectoryReplacements.Add(altBaseDirectory);
-        var currentDirectory = CleanPath(Environment.CurrentDirectory);
-        var altCurrentDirectory = currentDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        currentDirectoryReplacements.Add(currentDirectory);
-        currentDirectoryReplacements.Add(altCurrentDirectory);
+        return directory.Replace(dirSeparator, altDirSeparator);
+    }
+
+    public static void UseAssembly(string? solutionDir, string projectDir)
+    {
+        Dictionary<string, string> replacements = new();
+        var baseDir = CleanPath(AppDomain.CurrentDomain.BaseDirectory!);
+        var altBaseDir = baseDir.ReplaceAltDirChar();
+        replacements[baseDir + dirSeparator] = "{CurrentDirectory}";
+        replacements[baseDir] = "{CurrentDirectory}";
+        replacements[altBaseDir + altDirSeparator] = "{CurrentDirectory}";
+        replacements[altBaseDir] = "{CurrentDirectory}";
+
+        var currentDir = CleanPath(Environment.CurrentDirectory);
+        var altCurrentDir = currentDir.ReplaceAltDirChar();
+        replacements[currentDir + dirSeparator] = "{CurrentDirectory}";
+        replacements[currentDir] = "{CurrentDirectory}";
+        replacements[altCurrentDir + altDirSeparator] = "{CurrentDirectory}";
+        replacements[altCurrentDir] = "{CurrentDirectory}";
 #if !NET5_0_OR_GREATER
         if (CodeBaseLocation.CurrentDirectory is not null)
         {
             var codeBaseLocation = CleanPath(CodeBaseLocation.CurrentDirectory);
-            var altCodeBaseLocation = codeBaseLocation.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            currentDirectoryReplacements.Add(codeBaseLocation);
-            currentDirectoryReplacements.Add(altCodeBaseLocation);
+            var altCodeBaseLocation = codeBaseLocation.ReplaceAltDirChar();
+            replacements[codeBaseLocation + dirSeparator] = "{CurrentDirectory}";
+            replacements[codeBaseLocation] = "{CurrentDirectory}";
+            replacements[altCodeBaseLocation + altDirSeparator] = "{CurrentDirectory}";
+            replacements[altCodeBaseLocation] = "{CurrentDirectory}";
         }
 #endif
-        tempPath = CleanPath(Path.GetTempPath());
-        altTempPath = tempPath.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-    }
 
-    public static void UseAssembly(string? solutionDirectory, string projectDirectory)
-    {
-        sharedReplacements = GetReplacements(solutionDirectory, projectDirectory);
-    }
+        var tempPath = CleanPath(Path.GetTempPath());
+        var altTempPath = tempPath.ReplaceAltDirChar();
+        replacements[tempPath + dirSeparator] = "{TempPath}";
+        replacements[tempPath] = "{TempPath}";
+        replacements[altTempPath + altDirSeparator] = "{TempPath}";
+        replacements[altTempPath] = "{TempPath}";
 
-    static Action<StringBuilder> GetReplacements(string? solutionDirectory, string projectDirectory)
-    {
-        if (!VerifierSettings.scrubProjectDirectory &&
-            !VerifierSettings.scrubSolutionDirectory)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return _ => { };
+            var profileDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var altProfileDir = profileDir.ReplaceAltDirChar();
+            replacements[profileDir] = "{UserProfile}";
+            replacements[altProfileDir] = "{UserProfile}";
         }
 
-        var altProjectDirectory = projectDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var altProjectDirectoryTrimmed = altProjectDirectory.TrimEnd('/', '\\');
-        var projectDirectoryTrimmed = projectDirectory.TrimEnd('/', '\\');
+        AddProjectAndSolutionReplacements(solutionDir, projectDir, replacements);
+        ApplyScrubbers.replacements = replacements.OrderByDescending(x => x.Key).ToList();
+    }
 
-        if (!VerifierSettings.scrubSolutionDirectory ||
-            solutionDirectory == null)
+    static void AddProjectAndSolutionReplacements(string? solutionDir, string projectDir, Dictionary<string, string> replacements)
+    {
+        if (!VerifierSettings.scrubProjectDir &&
+            !VerifierSettings.scrubSolutionDir)
         {
-            return builder =>
-            {
-                builder.Replace(projectDirectory, "{ProjectDirectory}");
-                builder.Replace(projectDirectoryTrimmed, "{ProjectDirectory}");
-                builder.Replace(altProjectDirectory, "{ProjectDirectory}");
-                builder.Replace(altProjectDirectoryTrimmed, "{ProjectDirectory}");
-            };
+            return;
+        }
+        var altProjectDir = projectDir.ReplaceAltDirChar();
+        var altProjectDirTrimmed = altProjectDir.TrimEnd('/', '\\');
+        var projectDirTrimmed = projectDir.TrimEnd('/', '\\');
+
+        if (!VerifierSettings.scrubSolutionDir ||
+            solutionDir == null)
+        {
+            replacements[projectDir] = "{ProjectDirectory}";
+            replacements[projectDirTrimmed] = "{ProjectDirectory}";
+            replacements[altProjectDir] = "{ProjectDirectory}";
+            replacements[altProjectDirTrimmed] = "{ProjectDirectory}";
+
+            return;
         }
 
-        var altSolutionDirectory = solutionDirectory.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        var altSolutionDirectoryTrimmed = altSolutionDirectory.TrimEnd('/', '\\');
-        var solutionDirectoryTrimmed = solutionDirectory.TrimEnd('/', '\\');
-        return builder =>
-        {
-            builder.Replace(projectDirectory, "{ProjectDirectory}");
-            builder.Replace(projectDirectoryTrimmed, "{ProjectDirectory}");
-            builder.Replace(altProjectDirectory, "{ProjectDirectory}");
-            builder.Replace(altProjectDirectoryTrimmed, "{ProjectDirectory}");
+        var altSolutionDir = solutionDir.ReplaceAltDirChar();
+        var altSolutionDirTrimmed = altSolutionDir.TrimEnd('/', '\\');
+        var solutionDirectoryTrimmed = solutionDir.TrimEnd('/', '\\');
 
-            builder.Replace(solutionDirectory, "{SolutionDirectory}");
-            builder.Replace(solutionDirectoryTrimmed, "{SolutionDirectory}");
-            builder.Replace(altSolutionDirectory, "{SolutionDirectory}");
-            builder.Replace(altSolutionDirectoryTrimmed, "{SolutionDirectory}");
-        };
+        replacements[projectDir] = "{ProjectDirectory}";
+        replacements[projectDirTrimmed] = "{ProjectDirectory}";
+        replacements[altProjectDir] = "{ProjectDirectory}";
+        replacements[altProjectDirTrimmed] = "{ProjectDirectory}";
+
+        replacements[solutionDir] = "{SolutionDirectory}";
+        replacements[solutionDirectoryTrimmed] = "{SolutionDirectory}";
+        replacements[altSolutionDir] = "{SolutionDirectory}";
+        replacements[altSolutionDirTrimmed] = "{SolutionDirectory}";
     }
 
     public static void Apply(string extension, StringBuilder target, VerifySettings settings)
     {
-        foreach (var replace in currentDirectoryReplacements)
-        {
-            target.Replace(replace, "{CurrentDirectory}");
-        }
-
-        target.Replace(tempPath, "{TempPath}");
-        target.Replace(altTempPath, "{TempPath}");
-
         foreach (var scrubber in settings.InstanceScrubbers)
         {
             scrubber(target);
         }
-
-        sharedReplacements(target);
 
         if (settings.extensionMappedInstanceScrubbers.TryGetValue(extension, out var extensionBasedInstanceScrubbers))
         {
@@ -120,6 +129,11 @@ static class ApplyScrubbers
             {
                 scrubber(target);
             }
+        }
+
+        foreach (var replace in replacements)
+        {
+            target.Replace(replace.Key, replace.Value);
         }
 
         target.FixNewlines();

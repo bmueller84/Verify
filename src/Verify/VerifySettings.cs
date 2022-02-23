@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using DiffEngine;
+﻿using DiffEngine;
 
 namespace VerifyTests;
 
@@ -28,6 +27,17 @@ public partial class VerifySettings
         fileName = settings.fileName;
         UniquePrefixDisabled = settings.UniquePrefixDisabled;
         Namer = new(settings.Namer);
+        foreach (var append in settings.Appends)
+        {
+            if (append.Data is ICloneable cloneable)
+            {
+                AppendValue(append.Name, cloneable.Clone());
+            }
+            else
+            {
+                AppendValue(append.Name, append.Data);
+            }
+        }
         foreach (var pair in settings.Context)
         {
             if (pair.Value is ICloneable cloneable)

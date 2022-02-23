@@ -1,9 +1,6 @@
 ﻿#if DEBUG
 using DiffEngine;
 using EmptyFiles;
-using VerifyTests;
-using VerifyXunit;
-using Xunit;
 
 [UsesVerify]
 public partial class Tests
@@ -12,6 +9,12 @@ public partial class Tests
 
     static Tests()
     {
+        #region EnableClipboard
+
+        ClipboardAccept.Enable();
+
+        #endregion
+
         BuildServerDetector.Detected = false;
         DiffRunner.Disabled = false;
         DiffTools.AddTool(
@@ -89,12 +92,12 @@ Commands:
 
     static string BuildCommand(FilePair pair)
     {
-        return $"\"{toolPath}\" \"{pair.Received}\" \"{pair.Verified}\"";
+        return $"\"{toolPath}\" \"{pair.ReceivedPath}\" \"{pair.VerifiedPath}\"";
     }
 
     static void RunClipboardCommand()
     {
-        foreach (var line in ClipboardCapture
+        foreach (var line in ClipboardAccept
             .Read()
             .Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries))
         {
@@ -122,7 +125,7 @@ Commands:
     public Tests()
     {
         PrefixUnique.Clear();
-        ClipboardCapture.Clear();
+        ClipboardAccept.Clear();
     }
 }
 #endif

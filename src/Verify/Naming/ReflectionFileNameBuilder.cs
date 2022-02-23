@@ -1,11 +1,9 @@
-﻿using VerifyTests;
-
-class ReflectionFileNameBuilder
+﻿class ReflectionFileNameBuilder
 {
     public static (string fileNamePrefix, string? directory) FileNamePrefix(
-        MethodInfo method, 
-        Type type, 
-        string sourceFile, 
+        MethodInfo method,
+        Type type,
+        string sourceFile,
         VerifySettings settings,
         string uniqueness)
     {

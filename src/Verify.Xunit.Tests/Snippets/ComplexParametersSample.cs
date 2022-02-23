@@ -1,8 +1,4 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-#region xunitComplexMemberData
+﻿#region xunitComplexMemberData
 [UsesVerify]
 public class ComplexParametersSample
 {
@@ -10,6 +6,7 @@ public class ComplexParametersSample
     public static void Initialize()
     {
         VerifierSettings.NameForParameter<ComplexData>(_ => _.Value);
+        VerifierSettings.NameForParameter<ComplexStructData>(_ => _.Value);
     }
 
     [Theory]
@@ -18,14 +15,31 @@ public class ComplexParametersSample
     {
         var settings = new VerifySettings();
         settings.UseParameters(arg);
-        return Verifier.Verify(arg, settings);
+        return Verify(arg, settings);
     }
 
     [Theory]
     [MemberData(nameof(GetComplexMemberData))]
     public Task ComplexMemberDataFluent(ComplexData arg)
     {
-        return Verifier.Verify(arg)
+        return Verify(arg)
+            .UseParameters(arg);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberData))]
+    public Task ComplexMemberNullableData(ComplexData? arg)
+    {
+        var settings = new VerifySettings();
+        settings.UseParameters(arg);
+        return Verify(arg, settings);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberData))]
+    public Task ComplexMemberNullableDataFluent(ComplexData? arg)
+    {
+        return Verify(arg)
             .UseParameters(arg);
     }
 
@@ -45,5 +59,62 @@ public class ComplexParametersSample
     {
         public string Value { get; set; } = null!;
     }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberStructData(ComplexStructData arg)
+    {
+        var settings = new VerifySettings();
+        settings.UseParameters(arg);
+        return Verify(arg, settings);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberStructDataFluent(ComplexStructData arg)
+    {
+        return Verify(arg)
+            .UseParameters(arg);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberNullableStructData(ComplexStructData? arg)
+    {
+        var settings = new VerifySettings();
+        settings.UseParameters(arg);
+        return Verify(arg, settings);
+    }
+
+    [Theory]
+    [MemberData(nameof(GetComplexMemberStructData))]
+    public Task ComplexMemberNullableStructDataFluent(ComplexStructData? arg)
+    {
+        return Verify(arg)
+            .UseParameters(arg);
+    }
+
+    public static IEnumerable<object[]> GetComplexMemberStructData()
+    {
+        yield return new object[]
+        {
+            new ComplexStructData("Value1")
+        };
+        yield return new object[]
+        {
+            new ComplexStructData("Value2")
+        };
+    }
+
+    public struct ComplexStructData
+    {
+        public ComplexStructData(string value)
+        {
+            Value = value;
+        }
+
+        public string Value { get; set; } = null!;
+    }
 }
+
 #endregion

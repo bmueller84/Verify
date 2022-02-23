@@ -1,13 +1,10 @@
-﻿using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class WithAttributeTests
 {
     [Fact]
     public Task ShouldPass()
     {
-        return Verifier.Verify("Foo");
+        return Verify("Foo");
     }
 
     [UsesVerify]
@@ -16,7 +13,7 @@ public class WithAttributeTests
         [Fact]
         public Task ShouldPass()
         {
-            return Verifier.Verify("NestedFoo");
+            return Verify("NestedFoo");
         }
     }
 }

@@ -1,29 +1,28 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class ComparerTests
 {
+#if NET6_0
     [Fact]
     public async Task Instance_with_message()
     {
         var settings = new VerifySettings();
         settings.UseStringComparer(CompareWithMessage);
         settings.DisableDiff();
-        var exception = await Assert.ThrowsAsync<VerifyException>(() => Verifier.Verify("NotTheText", settings));
+        var exception = await Assert.ThrowsAsync<VerifyException>(() => Verify("NotTheText", settings));
         Assert.Contains("theMessage", exception.Message);
     }
+#endif
 
     [Fact]
     public async Task Instance()
     {
         var settings = new VerifySettings();
         settings.UseStringComparer(Compare);
-        await Verifier.Verify("TheText", settings);
+        await Verify("TheText", settings);
         PrefixUnique.Clear();
-        await Verifier.Verify("thetext", settings);
+        await Verify("thetext", settings);
     }
+
 #if(Release)
     [Fact]
     public async Task Static_with_message()
@@ -52,9 +51,9 @@ theMessage".Replace("\r\n", "\n"),
         VerifierSettings.RegisterStringComparer("staticComparerExt", Compare);
         var settings = new VerifySettings();
         settings.UseExtension("staticComparerExt");
-        await Verifier.Verify("TheText", settings);
+        await Verify("TheText", settings);
         PrefixUnique.Clear();
-        await Verifier.Verify("thetext", settings);
+        await Verify("thetext", settings);
     }
 
     static Task<CompareResult> Compare(string received, string verified, IReadOnlyDictionary<string, object> context)

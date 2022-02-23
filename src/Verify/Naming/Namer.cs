@@ -14,7 +14,7 @@ public class Namer
             {
                 return assemblyConfig;
             }
-                
+
             throw new("UniqueForAssemblyConfiguration used but no `AssemblyConfigurationAttribute` found.");
         }
     }
@@ -41,6 +41,14 @@ public class Namer
             return "Net";
         }
 
+        if (string.Equals(identifier, ".NETCoreApp", StringComparison.OrdinalIgnoreCase))
+        {
+            if (name.Version.Major < 5)
+            {
+                return "Core";
+            }
+        }
+
         if (identifier.StartsWith("NETCore", StringComparison.OrdinalIgnoreCase))
         {
             return "Core";
@@ -50,7 +58,7 @@ public class Namer
         {
             return "DotNet";
         }
-        
+
         throw new($"Could not resolve runtime for '{identifier}'.");
     }
 
@@ -74,7 +82,7 @@ public class Namer
             {
                 return targetFrameworkNameAndVersion;
             }
-                
+
             throw new("UniqueForTargetFrameworkAndVersion or UniqueForTargetFramework used but no `TargetFrameworkAttribute` found.");
         }
     }
@@ -87,7 +95,7 @@ public class Namer
             {
                 return targetFrameworkName;
             }
-                
+
             throw new("UniqueForTargetFrameworkAndVersion or UniqueForTargetFramework used but no `TargetFrameworkAttribute` found.");
         }
     }
@@ -112,7 +120,7 @@ public class Namer
         {
             return "Windows";
         }
-           
+
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             return "OSX";
@@ -148,6 +156,15 @@ public class Namer
 
     static (string runtime, Version Version) GetRuntimeAndVersion()
     {
+#if NETCOREAPP2_1
+        return ("Core", new(2, 1));
+#elif NETCOREAPP2_2
+        return ("Core", new(2, 2));
+#elif NETCOREAPP3_0
+        return ("Core", new(3, 0));
+#elif NETCOREAPP3_1
+        return ("Core", new(3, 1));
+#else
         var description = RuntimeInformation.FrameworkDescription;
 
         if (description.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase))
@@ -156,23 +173,17 @@ public class Namer
             return ("Net", version);
         }
 
-        var environmentVersion = Environment.Version;
-
-        if (description.StartsWith(".NET Core", StringComparison.OrdinalIgnoreCase))
-        {
-            return ("Core", environmentVersion);
-        }
-
         if (description.StartsWith(".NET", StringComparison.OrdinalIgnoreCase))
         {
-            return ("DotNet", environmentVersion);
+            return ("DotNet", Environment.Version);
         }
 
         if (description.StartsWith("Mono", StringComparison.OrdinalIgnoreCase))
         {
-            return ("Mono", environmentVersion);
+            return ("Mono", Environment.Version);
         }
 
         throw new($"Could not resolve runtime for '{description}'.");
+#endif
     }
 }

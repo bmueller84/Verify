@@ -1,8 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
-using Newtonsoft.Json;
-
-namespace VerifyTests;
+﻿namespace VerifyTests;
 
 public class SettingsTask
 {
@@ -32,6 +28,33 @@ public class SettingsTask
     public bool TryGetExtension([NotNullWhen(true)] out string? extension)
     {
         return CurrentSettings.TryGetExtension(out extension);
+    }
+
+    /// <summary>
+    /// Append a key-value pair to the serialized target.
+    /// </summary>
+    public SettingsTask AppendValue(string name, object data)
+    {
+        CurrentSettings.AppendValue(name, data);
+        return this;
+    }
+
+    /// <summary>
+    /// Append key-value pairs to the serialized target.
+    /// </summary>
+    public SettingsTask AppendValues(IEnumerable<KeyValuePair<string, object>> values)
+    {
+        CurrentSettings.AppendValues(values);
+        return this;
+    }
+
+    /// <summary>
+    /// Append key-value pairs to the serialized target.
+    /// </summary>
+    public SettingsTask AppendValues(params KeyValuePair<string, object>[] values)
+    {
+        CurrentSettings.AppendValues(values);
+        return this;
     }
 
     /// <summary>
@@ -134,7 +157,7 @@ public class SettingsTask
         CurrentSettings.UniqueForAssemblyConfiguration();
         return this;
     }
-    
+
     /// <summary>
     /// Use <paramref name="assembly"/> TargetFrameworkAttribute to make the test results unique.
     /// Used when a test produces different results based on TargetFramework.
@@ -305,6 +328,12 @@ public class SettingsTask
     public SettingsTask ModifySerialization(Action<SerializationSettings> action)
     {
         CurrentSettings.ModifySerialization(action);
+        return this;
+    }
+
+    public SettingsTask IgnoreStackTrack()
+    {
+        CurrentSettings.IgnoreStackTrack();
         return this;
     }
 

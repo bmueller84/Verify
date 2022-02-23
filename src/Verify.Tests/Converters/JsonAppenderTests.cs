@@ -1,8 +1,4 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-[UsesVerify]
+﻿[UsesVerify]
 public class JsonAppenderTests : IDisposable
 {
     static AsyncLocal<bool> isInThisTest = new();
@@ -45,7 +41,18 @@ public class JsonAppenderTests : IDisposable
     [Fact]
     public Task WithJsonAppender()
     {
-        return Verifier.Verify("TheValue");
+        return Verify("TheValue");
+    }
+
+    #endregion
+
+    #region JsonLocalAppender
+
+    [Fact]
+    public Task WithLocalJsonAppender()
+    {
+        return Verify("TheValue")
+            .AppendValue("name", "value");
     }
 
     #endregion
@@ -53,26 +60,26 @@ public class JsonAppenderTests : IDisposable
     [Fact]
     public Task NullText()
     {
-        return Verifier.Verify((string) null!);
+        return Verify((string) null!);
     }
 
     [Fact]
     public Task Anon()
     {
-        return Verifier.Verify(new {foo = "bar"});
+        return Verify(new {foo = "bar"});
     }
 
     #region JsonAppenderStream
     [Fact]
     public Task Stream()
     {
-        return Verifier.Verify(FileHelpers.OpenRead("sample.txt"));
+        return Verify(IoHelpers.OpenRead("sample.txt"));
     }
     #endregion
 
     [Fact]
     public Task File()
     {
-        return Verifier.VerifyFile("sample.txt");
+        return VerifyFile("sample.txt");
     }
 }

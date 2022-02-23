@@ -1,10 +1,14 @@
-﻿using System.Text.RegularExpressions;
-
-namespace VerifyTests;
+﻿namespace VerifyTests;
 
 public static partial class VerifierSettings
 {
-    internal static List<Action<StringBuilder>> GlobalScrubbers = new();
+    internal static List<Action<StringBuilder>> GlobalScrubbers= new();
+
+    static VerifierSettings()
+    {
+        MemberConverter<Exception, string>(x => x.StackTrace, (_, value) => Scrubbers.ScrubStackTrace(value));
+    }
+
     internal static Dictionary<string, List<Action<StringBuilder>>> ExtensionMappedGlobalScrubbers = new();
 
     /// <summary>

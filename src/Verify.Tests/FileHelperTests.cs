@@ -1,11 +1,9 @@
-﻿using Xunit;
-
-public class FileHelperTests
+﻿public class FileHelperTests
 {
     [Fact]
     public void ShouldNotLock()
     {
-        using (FileHelpers.OpenRead("sample.txt"))
+        using (IoHelpers.OpenRead("sample.txt"))
         {
             Assert.False(FileEx.IsFileReadLocked("sample.txt"));
         }

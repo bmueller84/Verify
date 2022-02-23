@@ -1,8 +1,4 @@
-﻿using VerifyTests;
-using VerifyXunit;
-using Xunit;
-
-#region UniqueForSampleXunit
+﻿#region UniqueForSampleXunit
 
 [UsesVerify]
 public class UniqueForSample
@@ -12,13 +8,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntime();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task RuntimeFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForRuntime();
     }
 
@@ -27,7 +23,7 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForRuntimeAndVersion();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
@@ -35,13 +31,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForAssemblyConfiguration();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task AssemblyConfigurationFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForAssemblyConfiguration();
     }
 
@@ -50,13 +46,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForArchitecture();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task ArchitectureFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForArchitecture();
     }
 
@@ -65,13 +61,13 @@ public class UniqueForSample
     {
         var settings = new VerifySettings();
         settings.UniqueForOSPlatform();
-        return Verifier.Verify("value", settings);
+        return Verify("value", settings);
     }
 
     [Fact]
     public Task OSPlatformFluent()
     {
-        return Verifier.Verify("value")
+        return Verify("value")
             .UniqueForOSPlatform();
     }
 }

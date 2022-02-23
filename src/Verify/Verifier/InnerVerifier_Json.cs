@@ -1,8 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using VerifyTests;
-
-partial class InnerVerifier
+﻿partial class InnerVerifier
 {
     static IEnumerable<Target> emptyTargets = Enumerable.Empty<Target>();
 
@@ -26,8 +22,8 @@ partial class InnerVerifier
             return;
         }
 
-        using StreamReader reader = new (target);
-        using JsonTextReader textReader = new(reader);
+        using var reader = new StreamReader(target);
+        using var textReader = new JsonTextReader(reader);
         var json = await JToken.LoadAsync(textReader);
         await VerifyJson(json);
     }
@@ -70,7 +66,7 @@ partial class InnerVerifier
         {
            // AssertExtensionIsNull();
             var result = await converter.Conversion(target, settings.Context);
-            await VerifyInner(result.Info, result.Cleanup, result.Targets); 
+            await VerifyInner(result.Info, result.Cleanup, result.Targets);
             return;
         }
 
